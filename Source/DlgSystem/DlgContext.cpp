@@ -25,6 +25,11 @@ void UDlgContext::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ThisClass, Dialogue);
 	DOREPLIFETIME(ThisClass, SerializedParticipants);
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	DOREPLIFETIME(ThisClass, ActiveNodeIndex);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 }
 
 void UDlgContext::SerializeParticipants()
@@ -47,6 +52,17 @@ void UDlgContext::OnRep_SerializedParticipants()
 		}
 	}
 }
+
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+void UDlgContext::OnRep_ActiveNodeIndex(
+	int32 PrevActiveNodeIndex
+	)
+{
+	EnterNode(ActiveNodeIndex, {});
+}
+// Torbie End Change
+//-----------------------------------------------------------------------------
 
 bool UDlgContext::ChooseOption(int32 OptionIndex)
 {
@@ -508,10 +524,39 @@ bool UDlgContext::EnterNode(int32 NodeIndex, TSet<const UDlgNode*> NodesEnteredW
 		return false;
 	}
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	if (ActiveNodeIndex != NodeIndex && ActiveNodeIndex != INDEX_NONE)
+	{
+		UDlgNode* ActiveNode = GetMutableNodeFromIndex(ActiveNodeIndex);
+		if (IsValid(ActiveNode))
+		{
+			// Fire all the node exit events
+			ActiveNode->FireNodeExitEvents(*this);
+		}
+		else
+		{
+			LogErrorWithContext(FString::Printf(TEXT("ExitNode - FAILED because of INVALID ActiveNodeIndex = %d"), ActiveNodeIndex));
+		}
+	}
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	ActiveNodeIndex = NodeIndex;
 	SetNodeVisited(NodeIndex, Node->GetGUID());
 
-	return Node->HandleNodeEnter(*this, NodesEnteredWithThisStep);
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	bDialogueEnded = !Node->HandleNodeEnter(*this, NodesEnteredWithThisStep);
+
+	if (OnDlgStateChanged.IsBound())
+	{
+		OnDlgStateChanged.Broadcast(this);
+	}
+
+	return !bDialogueEnded;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 }
 
 UDlgContext* UDlgContext::CreateCopy() const
@@ -754,7 +799,18 @@ bool UDlgContext::StartWithContextFromNode(
 	ActiveNodeIndex = StartNodeIndex;
 	SetNodeVisited(StartNodeIndex, Node->GetGUID());
 
-	return Node->ReevaluateChildren(*this, {});
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	bDialogueEnded = !Node->ReevaluateChildren(*this, {});
+
+	if (OnDlgStateChanged.IsBound())
+	{
+		OnDlgStateChanged.Broadcast(this);
+	}
+
+	return !bDialogueEnded;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 }
 
 FString UDlgContext::GetContextString() const
@@ -954,10 +1010,16 @@ bool UDlgContext::ValidateParticipantsMapForDialogue(
 			// Participant does note exist, just warn about it, we are relaxed about this
 			if (bLog)
 			{
+				//-----------------------------------------------------------------------------
+				// Torbie Begin Change
+#if 0
 				FDlgLogger::Get().Warningf(
 					TEXT("%s - Participant Path = `%s` with Participant Name = `%s` is NOT referenced (DOES) not exist inside the Dialogue. It is going to be IGNORED.\nContext:\n\tDialogue = `%s`"),
 					*ContextMessage, *Participant->GetPathName(), *ParticipantName.ToString(), *Dialogue->GetPathName()
 				);
+#endif
+				// Torbie End Change
+				//-----------------------------------------------------------------------------
 			}
 		}
 	}
