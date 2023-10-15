@@ -7,12 +7,16 @@
 
 class IToolkitHost;
 
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
 /**
  * Defines the look and actions the editor takes when clicking/viewing a Dialogue asset.
  * See FDlgSystemEditorModule::StartupModule for usage.
  */
-class FDlgDialogueAssetTypeActions : public FAssetTypeActions_Base
+class DLGSYSTEMEDITOR_API FDlgDialogueAssetTypeActions : public FAssetTypeActions_Base
 {
+// Torbie End Change
+//-----------------------------------------------------------------------------
 public:
 	FDlgDialogueAssetTypeActions(EAssetTypeCategories::Type InAssetCategory) : AssetCategory(InAssetCategory) {}
 
@@ -39,13 +43,21 @@ public:
 	/** Opens the asset editor for the specified objects. If EditWithinLevelEditor is valid, the world-centric editor will be used. */
 	void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
 	/** Returns the categories that this asset type. The return value is one or more flags from EAssetTypeCategories.  */
-	uint32 GetCategories() override { return AssetCategory; }
+	uint32 GetCategories() override { return GetDefault<UDlgSystemSettings>()->bExposeAssetCreation ? AssetCategory : 0; }
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	// Hide from filtered, we use our custom FFrontendFilter_Dialogue because it allows us more flexibility
 	bool CanFilter() override { return true; }
 
-private:
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+protected:
+// Torbie End Change
+//-----------------------------------------------------------------------------
 	/** Indicates the category used for Dialogues */
 	EAssetTypeCategories::Type AssetCategory;
 };

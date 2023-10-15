@@ -453,6 +453,13 @@ TArray<FName> UDlgManager::GetDialoguesParticipantNames()
 		UniqueNames.Append(Dialogue->GetParticipantNames());
 	}
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	const UDlgSystemSettings* Settings = GetDefault<UDlgSystemSettings>();
+	UniqueNames.Append(Settings->DefaultParticipantOptions);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	TArray<FName> Array;
 	FDlgHelper::AppendSortedSetToArray(UniqueNames, Array);
 	return Array;

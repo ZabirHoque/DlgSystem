@@ -111,6 +111,14 @@ TArray<FName> FDlgDetailsPanelUtils::GetDialogueSortedParticipantNames(UDlgDialo
 	}
 
 	TSet<FName> ParticipantNames = Dialogue->GetParticipantNames();
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	const UDlgSystemSettings* Settings = GetDefault<UDlgSystemSettings>();
+	ParticipantNames.Append(Settings->DefaultParticipantOptions);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	FDlgHelper::SortDefault(ParticipantNames);
 	return ParticipantNames.Array();
 }

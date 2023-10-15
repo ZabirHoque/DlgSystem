@@ -27,7 +27,11 @@ public:
 	// Same Color as the Blueprints
 	FColor GetTypeColor() const override { return FColor(63, 126, 255); }
 	bool HasActions(const TArray<UObject*>& InObjects) const override { return false; }
-	uint32 GetCategories() override { return AssetCategory; }
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	uint32 GetCategories() override { return GetDefault<UDlgSystemSettings>()->bExposeAssetCreation ? AssetCategory : 0; }
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 	bool CanFilter() override { return true; }
 	void BuildBackendFilter(FARFilter& InFilter) override
 	{
