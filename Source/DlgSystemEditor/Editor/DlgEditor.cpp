@@ -321,11 +321,18 @@ void FDlgEditor::InitDialogueEditor(
 
 	// Default layout
 	const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout =
-		FTabManager::NewLayout("Standalone_DialogueEditor_Layout_v1")
+		//-----------------------------------------------------------------------------
+		// Torbie Begin Change
+		FTabManager::NewLayout("Standalone_DialogueEditor_Layout_v2")
+		// Torbie End Change
+		//-----------------------------------------------------------------------------
 		->AddArea
 		(
 			FTabManager::NewPrimaryArea()
 			->SetOrientation(Orient_Vertical)
+			//-----------------------------------------------------------------------------
+			// Torbie Begin Change
+			/*
 			->Split
 			(
 				// Toolbar
@@ -336,6 +343,9 @@ void FDlgEditor::InitDialogueEditor(
 #endif
 				->SetHideTabWell(true)
 			)
+			*/
+			// Torbie End Change
+			//-----------------------------------------------------------------------------
 			->Split
 			(
 				// Main Application area
