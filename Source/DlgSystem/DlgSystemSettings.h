@@ -262,6 +262,13 @@ public:
 	EDlgNoSatisfiedChildBehavior NoSatisfiedChildBehavior;
 
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	UPROPERTY(Category = "Dialogue", Config, EditAnywhere, meta = (ConfigRestartRequired = true))
+	bool bExposeAssetCreation = true;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	// The dialogue text format used for saving and reloading from text files.
 	UPROPERTY(Category = "Dialogue", Config, EditAnywhere, DisplayName = "Text Format")
 	EDlgDialogueTextFormat DialogueTextFormat = EDlgDialogueTextFormat::None;
@@ -298,6 +305,13 @@ public:
 
 	UPROPERTY(Category = "Dialogue Node Data", Config, EditAnywhere, AdvancedDisplay)
 	bool bShowAdvancedChildren = true;
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	UPROPERTY(Category = "Dialogue Node Data", Config, EditAnywhere)
+	TArray<FName> DefaultParticipantOptions;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	// Any properties that belong to these classes won't be shown in the suggestion list when you use the reflection system (class variables).
 	UPROPERTY(Category = "Dialogue", Config, EditAnywhere)
@@ -530,6 +544,14 @@ public:
 	UPROPERTY(Category = "Graph Edge", Config, EditAnywhere)
 	bool bShowEdgeHasConditionsIcon = true;
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	// To show or not the text icon in the case the edge has any text defined on it.
+	UPROPERTY(Category = "Graph Edge", Config, EditAnywhere)
+	bool bShowEdgeHasTextIcon = true;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+	
 	// To show or not the edge text
 	UPROPERTY(Category = "Graph Edge Text", Config, EditAnywhere)
 	bool bShowEdgeText = true;

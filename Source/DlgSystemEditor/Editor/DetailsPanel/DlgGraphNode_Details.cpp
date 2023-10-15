@@ -9,6 +9,11 @@
 #include "DlgSystem/Nodes/DlgNode_Speech.h"
 #include "DlgSystem/Nodes/DlgNode_Selector.h"
 #include "DlgSystem/Nodes/DlgNode_Proxy.h"
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+#include "DlgSystemEditor/DlgSystemEditorModule.h"
+// Torbie End Change
+//-----------------------------------------------------------------------------
 #include "DlgSystemEditor/Editor/Nodes/DialogueGraphNode.h"
 #include "DlgSystemEditor/Editor/DetailsPanel/Widgets/SDlgTextPropertyPickList.h"
 #include "DlgSystemEditor/Editor/DetailsPanel/Widgets/DlgTextPropertyPickList_CustomRowHelper.h"
@@ -100,6 +105,13 @@ void FDlgGraphNode_Details::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder
 
 		BaseDataCategory.AddProperty(PropertyDialogueNode->GetChildHandle(UDlgNode::GetMemberNameEnterEvents()))
 			.ShouldAutoExpand(true);
+
+		//-----------------------------------------------------------------------------
+		// Torbie Begin Change
+		BaseDataCategory.AddProperty(PropertyDialogueNode->GetChildHandle(UDlgNode::GetMemberNameExitEvents()))
+		                .ShouldAutoExpand(true);
+		// Torbie End Change
+		//-----------------------------------------------------------------------------
 	}
 
 	// GUID
@@ -261,6 +273,29 @@ void FDlgGraphNode_Details::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder
 		SpeechSequenceDataCategory.AddProperty(PropertyDialogueNode->GetChildHandle(UDlgNode_SpeechSequence::GetMemberNameSpeechSequence()))
 			.ShouldAutoExpand(true);;
 	}
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	else if (bIsEndNode)
+	{
+		IDetailCategoryBuilder& EndDataCategory = DetailLayoutBuilder->EditCategory(TEXT("End Node"));
+		EndDataCategory.InitiallyCollapsed(false);
+
+		// Node Data that can be anything set by the user
+		NodeDataPropertyRow = &EndDataCategory.AddProperty(
+			PropertyDialogueNode->GetChildHandle(UDlgNode_End::GetMemberNameNodeData())
+		);
+		NodeDataPropertyRow->Visibility(CREATE_VISIBILITY_CALLBACK_STATIC(&FDlgDetailsPanelUtils::GetNodeDataVisibility));
+		NodeDataPropertyRow->ShouldAutoExpand(true);
+		NodeDataPropertyRow->ShowPropertyButtons(true);
+	}
+
+	auto& DlgSystemEditorModule = FModuleManager::GetModuleChecked<FDlgSystemEditorModule>("DlgSystemEditor");
+	for (auto& customizationExt : DlgSystemEditorModule.GetGraphNodeDetailCustomizations())
+	{
+		customizationExt->CustomizeDetails(DetailBuilder);
+	}
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 }
 
 void FDlgGraphNode_Details::HandleTextCommitted(const FText& InText, ETextCommit::Type CommitInfo)

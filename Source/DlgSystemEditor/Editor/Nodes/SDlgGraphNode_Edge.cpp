@@ -84,6 +84,13 @@ void SDlgGraphNode_Edge::PerformSecondPassLayout(const TMap<UObject*, TSharedRef
 
 TArray<FOverlayWidgetInfo> SDlgGraphNode_Edge::GetOverlayWidgets(bool bSelected, const FVector2D& WidgetSize) const
 {
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	static constexpr float DistanceBetweenWidgetsX = 1.0f;
+	FVector2D              OriginOverlay(0.0f, 0.0f);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	// This is called after PerformSecondPassLayout, so the Edge should be in it's final Position Already
 	TArray<FOverlayWidgetInfo> Widgets;
 
@@ -96,8 +103,28 @@ TArray<FOverlayWidgetInfo> SDlgGraphNode_Edge::GetOverlayWidgets(bool bSelected,
 			const FVector2D& NewDesiredSize = ConditionOverlayWidget->GetDesiredSize();
 			Overlay.OverlayOffset = FVector2D(WidgetSize.X - NewDesiredSize.X / 2.0f, -NewDesiredSize.Y / 2.0f);
 			Widgets.Add(Overlay);
+
+			OriginOverlay.X += NewDesiredSize.X + DistanceBetweenWidgetsX;
 		}
 	}
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	if (TextOverlayWidget.IsValid())
+	{
+		if (Settings->bShowEdgeHasTextIcon && DialogueGraphNode_Edge->HasDialogueEdgeText())
+		{
+			FOverlayWidgetInfo Overlay(TextOverlayWidget);
+			// Position on the top/right of the node
+			const FVector2D& NewDesiredSize = TextOverlayWidget->GetDesiredSize();
+			Overlay.OverlayOffset = FVector2D((WidgetSize.X - NewDesiredSize.X / 2.0f) + OriginOverlay.X, -NewDesiredSize.Y / 2.0f);
+			Widgets.Add(Overlay);
+
+			OriginOverlay.X += NewDesiredSize.X + DistanceBetweenWidgetsX;
+		}
+	}
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	return Widgets;
 }
@@ -128,6 +155,21 @@ void SDlgGraphNode_Edge::UpdateGraphNode()
 		.ToolTipText(this, &Self::GetConditionOverlayTooltipText)
 		.Visibility(this, &Self::GetOverlayWidgetVisibility)
 		.OnGetBackgroundColor(this, &Self::GetOverlayWidgetBackgroundColor);
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	TextOverlayWidget = SNew(SDlgNodeOverlayWidget)
+		.OverlayBody(
+		    SNew(STextBlock)
+			.Text(FText::FromString(TEXT("T")))
+			.ColorAndOpacity(FLinearColor::White)
+			.Font(FNYAppStyle::GetFontStyle("BTEditor.Graph.BTNode.IndexText"))
+		)
+		.ToolTipText(this, &Self::GetTextOverlayTooltipText)
+		.Visibility(this, &Self::GetOverlayWidgetVisibility)
+		.OnGetBackgroundColor(this, &Self::GetOverlayWidgetBackgroundColor);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	// Set Default tooltip
 	if (!SWidget::GetToolTip().IsValid())
@@ -271,6 +313,15 @@ FText SDlgGraphNode_Edge::GetConditionOverlayTooltipText() const
 {
 	return LOCTEXT("NodeConditionTooltip", "Edge has conditions.\nOnly if these conditions are satisfied then this edge is considered as an option.");
 }
+
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+FText SDlgGraphNode_Edge::GetTextOverlayTooltipText() const
+{
+	return LOCTEXT("NodeTextTooltip", "Edge contains text that can be presented.");
+}
+// Torbie End Change
+//-----------------------------------------------------------------------------
 
 FText SDlgGraphNode_Edge::GetEdgeText() const
 {

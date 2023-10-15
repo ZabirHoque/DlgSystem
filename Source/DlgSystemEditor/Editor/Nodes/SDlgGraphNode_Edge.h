@@ -79,6 +79,13 @@ protected:
 	/** Gets the tooltip for the condition overlay. */
 	FText GetConditionOverlayTooltipText() const;
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	/** Gets the tooltip for the text overlay. */
+	FText GetTextOverlayTooltipText() const;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	/** Get the visibility of the overlay widgets. */
 	EVisibility GetOverlayWidgetVisibility() const;
 
@@ -99,4 +106,11 @@ protected:
 
 	/** The widget we use to display if the edge has any conditions */
 	TSharedPtr<SWidget> ConditionOverlayWidget;
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	/** The widget we use to display if the edge has any text */
+	TSharedPtr<SWidget> TextOverlayWidget;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 };

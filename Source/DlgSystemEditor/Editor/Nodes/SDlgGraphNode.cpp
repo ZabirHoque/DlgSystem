@@ -122,9 +122,13 @@ TArray<FOverlayWidgetInfo> SDlgGraphNode::GetOverlayWidgets(bool bSelected, cons
 		OriginLeftSide.Y += ConditionOverlayWidget->GetDesiredSize().Y + DistanceBetweenWidgetsY;
 	}
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
 	// Add Event overlay
-	if (Settings->bShowHasEnterEventsIcon && DialogueGraphNode->HasEnterEvents())
+	if (Settings->bShowHasEnterEventsIcon && (DialogueGraphNode->HasEnterEvents() || DialogueGraphNode->HasExitEvents()))
 	{
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 		// Position on the left of the node
 		FOverlayWidgetInfo Overlay(EventOverlayWidget);
 		Overlay.OverlayOffset = FVector2D(-EventOverlayWidget->GetDesiredSize().X / 1.5f, OriginLeftSide.Y);
@@ -589,7 +593,11 @@ FText SDlgGraphNode::GetConditionOverlayTooltipText() const
 
 FText SDlgGraphNode::GetEventOverlayTooltipText() const
 {
-	return LOCTEXT("NodeEventTooltip", "Node has enter events.\nOn node enter this events are executed.");
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	return LOCTEXT("NodeEventTooltip", "Node has enter/exit events.\nOn node enter/exit these events are executed.");
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 }
 
 FText SDlgGraphNode::GetVoiceOverlayTooltipText() const

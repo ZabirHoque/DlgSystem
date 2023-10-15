@@ -135,6 +135,16 @@ public:
 		DialogueEdge.SetText(InText);
 	}
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	/** Gets if DialogueEdge.Text is empty or not. */
+	bool HasDialogueEdgeText() const
+	{
+		return !DialogueEdge.GetText().IsEmpty();
+	}
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	/** Tells us if this edge has any conditions set. */
 	bool HasConditions() const { return DialogueEdge.Conditions.Num() > 0; }
 
@@ -191,7 +201,11 @@ protected:
 		CreatePin(EGPD_Output, CategoryName, PinName, PinParams);
 	}
 
-private:
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+public:
+// Torbie End Change
+//-----------------------------------------------------------------------------
 	// Begin own functions
 	/** Gets the corresponding FDlgEdge that this Node actually represents from the ParentNode */
 	FDlgEdge* GetMutableDialogueEdgeFromParentNode() const;

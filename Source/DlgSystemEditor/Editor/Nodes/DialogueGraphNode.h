@@ -250,6 +250,16 @@ public:
 		return DialogueNode ? DialogueNode->HasAnyEnterEvents() : false;
 	}
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	/** Does this node have any exit events? */
+	bool HasExitEvents() const
+	{
+		return DialogueNode ? DialogueNode->HasAnyExitEvents() : false;
+	}
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	/** Does this node has any voice properties set? */
 	bool HasVoicePropertiesSet() const;
 
