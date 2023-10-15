@@ -165,6 +165,22 @@ public:
 
 	virtual void SetNodeEnterEvents(const TArray<FDlgEvent>& InEnterEvents) { EnterEvents = InEnterEvents; }
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	//
+	// For the ExitEvents
+	//
+
+	UFUNCTION(BlueprintPure, Category = "Dialogue|Node")
+	virtual bool HasAnyExitEvents() const { return GetNodeExitEvents().Num() > 0; }
+
+	UFUNCTION(BlueprintPure, Category = "Dialogue|Node")
+	virtual const TArray<FDlgEvent>& GetNodeExitEvents() const { return ExitEvents; }
+
+	virtual void SetNodeExitEvents(const TArray<FDlgEvent>& InExitEvents) { ExitEvents = InExitEvents; }
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	//
 	// For the Children
 	//
@@ -286,6 +302,11 @@ public:
 	static FName GetMemberNameEnterConditions() { return GET_MEMBER_NAME_CHECKED(UDlgNode, EnterConditions); }
 	static FName GetMemberNameEnterRestriction() { return GET_MEMBER_NAME_CHECKED(UDlgNode, EnterRestriction); }
 	static FName GetMemberNameEnterEvents() { return GET_MEMBER_NAME_CHECKED(UDlgNode, EnterEvents); }
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	static FName GetMemberNameExitEvents() { return GET_MEMBER_NAME_CHECKED(UDlgNode, ExitEvents); }
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 	static FName GetMemberNameChildren() { return GET_MEMBER_NAME_CHECKED(UDlgNode, Children); }
 	static FName GetMemberNameGUID() { return GET_MEMBER_NAME_CHECKED(UDlgNode, NodeGUID); }
 
@@ -294,6 +315,13 @@ public:
 
 	// Fires this Node enter Events
 	void FireNodeEnterEvents(UDlgContext& Context);
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	// Fires this Node enter Events
+	void FireNodeExitEvents(UDlgContext& Context);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 protected:
 #if WITH_EDITORONLY_DATA
@@ -327,6 +355,14 @@ protected:
 	// Events fired when the node is reached in the dialogue
 	UPROPERTY(EditAnywhere, Category = "Dialogue|Node")
 	TArray<FDlgEvent> EnterEvents;
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	// Events fired when the node is exited in the dialogue
+	UPROPERTY(EditAnywhere, Category = "Dialogue|Node")
+	TArray<FDlgEvent> ExitEvents;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	// The Unique identifier for each Node. This is much safer than a Node Index.
 	// Compile/Save Asset to generate this

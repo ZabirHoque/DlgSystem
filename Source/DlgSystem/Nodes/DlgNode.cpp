@@ -158,6 +158,25 @@ void UDlgNode::FireNodeEnterEvents(UDlgContext& Context)
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+void UDlgNode::FireNodeExitEvents(UDlgContext& Context)
+{
+	for (const FDlgEvent& Event : ExitEvents)
+	{
+		// Get Participant from either event or parent
+		UObject* Participant = Context.GetMutableParticipant(Event.ParticipantName);
+		if (!IsValid(Participant))
+		{
+			Participant = Context.GetMutableParticipant(OwnerName);
+		}
+
+		Event.Call(Context, TEXT("FireNodeExitEvents"), Participant);
+	}
+}
+// Torbie End Change
+//-----------------------------------------------------------------------------
+
 bool UDlgNode::ReevaluateChildren(UDlgContext& Context, TSet<const UDlgNode*> AlreadyEvaluated)
 {
 	TArray<FDlgEdge>& AvailableOptions = Context.GetMutableOptionsArray();
