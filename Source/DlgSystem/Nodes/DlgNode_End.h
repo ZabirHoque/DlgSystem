@@ -31,4 +31,18 @@ public:
 #if WITH_EDITOR
 	FString GetNodeTypeString() const override { return TEXT("End"); }
 #endif
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	static FName GetMemberNameNodeData() { return GET_MEMBER_NAME_CHECKED(UDlgNode_End, NodeData); }
+
+	UDlgNodeData* GetNodeData() const override { return NodeData; }
+
+	// User Defined Custom Node data you can customize yourself with your own data types
+	//
+	// Create a new Blueprint derived from DlgNodeData (or DlgNodeDataHideCategories)
+	UPROPERTY(EditAnywhere, Instanced, Category = "Dialogue|Node")
+	UDlgNodeData* NodeData = nullptr;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 };
