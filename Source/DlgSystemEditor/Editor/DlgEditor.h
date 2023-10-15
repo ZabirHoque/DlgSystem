@@ -85,13 +85,28 @@ public:
 		Collector.AddReferencedObject(DialogueBeingEdited);
 	}
 
-#if NY_ENGINE_VERSION >= 500
-	virtual FString GetReferencerName() const override
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	FString GetReferencerName() const override
 	{
 		return TEXT("FDlgEditor");
 	}
-#endif
 
+	bool GetReferencerPropertyName(UObject* Object, FString& OutPropertyName) const override
+	{
+		if (Object == DialogueBeingEdited)
+		{
+			OutPropertyName = "DialogueBeingEdited";
+		}
+		else
+		{
+			return false;
+		}
+
+		return true;
+	}
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	//
 	// IDlgEditor interface

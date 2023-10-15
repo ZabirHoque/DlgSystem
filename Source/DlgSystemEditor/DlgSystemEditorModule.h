@@ -50,6 +50,25 @@ public:
 	static void MapActionsForFileMenuExtender(TSharedRef<FUICommandList> Commands);
 	static void MapActionsForHelpMenuExtender(TSharedRef<FUICommandList> Commands);
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	void RegisterGraphNodeCustomization(TSharedRef<IDetailCustomization> InDetailCustomization)
+	{
+		RegisteredGraphNodeDetailCustomizations.Add(InDetailCustomization);
+	}
+
+	void UnregisterGraphNodeCustomization(TSharedRef<IDetailCustomization> InDetailCustomization)
+	{
+		RegisteredGraphNodeDetailCustomizations.Remove(InDetailCustomization);
+	}
+
+	const TArray<TSharedRef<IDetailCustomization>>& GetGraphNodeDetailCustomizations() const
+	{
+		return RegisteredGraphNodeDetailCustomizations;
+	}
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 private:
 	// Handle clicking on save all dialogues.
 	static void HandleOnSaveAllDialogues();
@@ -87,6 +106,13 @@ private:
 
 	// All registered custom property layouts for the details panel. Cached here so that we can unregister them during shutdown.
 	TArray<FName> RegisteredCustomPropertyTypeLayout;
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	// All registered graph node detail customizations external to this plugin.
+	TArray<TSharedRef<IDetailCustomization>> RegisteredGraphNodeDetailCustomizations;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	// The factory of how the nodes look.
 	TSharedPtr<FGraphPanelNodeFactory> DialogueGraphNodeFactory;

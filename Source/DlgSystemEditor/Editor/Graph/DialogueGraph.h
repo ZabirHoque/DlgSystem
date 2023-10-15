@@ -15,9 +15,13 @@ class UDialogueGraphNode_Root;
 class UDialogueGraphNode_Edge;
 class UDialogueGraphSchema;
 
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
 UCLASS()
-class UDialogueGraph : public UEdGraph
+class DLGSYSTEMEDITOR_API UDialogueGraph : public UEdGraph
 {
+// Torbie End Change
+//-----------------------------------------------------------------------------
 	GENERATED_BODY()
 
 public:
