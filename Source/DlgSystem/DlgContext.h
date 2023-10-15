@@ -102,6 +102,16 @@ public:
 	void OnRep_SerializedParticipants();
 	void SerializeParticipants();
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	DECLARE_MULTICAST_DELEGATE_OneParam(FDlgStateChanged, UDlgContext*);
+	FDlgStateChanged OnDlgStateChanged;
+
+	UFUNCTION()
+	void OnRep_ActiveNodeIndex(int32 PrevActiveNodeIndex);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	UE_DEPRECATED(4.22, "ChooseChild has been deprecated in Favour of ChooseOption")
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|Control", meta = (DeprecatedFunction, DeprecationMessage = "ChooseChild has been deprecated in favour of ChooseOption"))
 	bool ChooseChild(int32 OptionIndex) { return ChooseOption(OptionIndex); }
@@ -597,8 +607,13 @@ protected:
 	UPROPERTY()
 	TMap<FName, UObject*> Participants;
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
 	// The index of the active node in the dialogues Nodes array
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_ActiveNodeIndex)
 	int32 ActiveNodeIndex = INDEX_NONE;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	// Options of the active node with satisfied conditions - the options the player can choose from
 	TArray<FDlgEdge> AvailableChildren;
