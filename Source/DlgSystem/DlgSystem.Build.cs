@@ -12,6 +12,12 @@ public class DlgSystem : ModuleRules
 		// https://docs.unrealengine.com/latest/INT/Programming/UnrealBuildSystem/Configuration/
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		//-----------------------------------------------------------------------------
+		// Torbie Begin Change
+		bLegacyParentIncludePaths = true;
+		// Torbie End Change
+		//-----------------------------------------------------------------------------
+
 #if UE_5_2_OR_LATER
 		IWYUSupport = IWYUSupport.Full;
 #else
