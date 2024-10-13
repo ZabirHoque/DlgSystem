@@ -340,6 +340,12 @@ void FDlgSystemEditorModule::HandleOnBeginPIE(bool bIsSimulating)
 
 void FDlgSystemEditorModule::HandleOnPostPIEStarted(bool bIsSimulating)
 {
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	FDlgMemory::Get().SetHistoryMapOverride(nullptr);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	const UDlgSystemSettings* Settings = GetDefault<UDlgSystemSettings>();
 	if (!Settings)
 	{

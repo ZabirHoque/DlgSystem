@@ -321,6 +321,12 @@ void FDlgSystemModule::HandleDialogueRenamed(UDlgDialogue* RenamedDialogue, cons
 
 void FDlgSystemModule::HandleOnPreLoadMap(const FString& MapName)
 {
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	FDlgMemory::Get().SetHistoryMapOverride(nullptr);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	// NOTE: only in NON editor game
 	const UDlgSystemSettings* Settings = GetDefault<UDlgSystemSettings>();
 	if (!Settings)
