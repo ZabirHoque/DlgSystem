@@ -344,10 +344,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Dialogue|Data", DisplayName = "Get Node Index For GUID")
 	int32 GetNodeIndexForGUID(const FGuid& NodeGUID) const;
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+#if 0
 	// Returns the indices which were visited inside this single context. For global data check DlgMemory
 	// NOTE: You should use GetVisitedNodeGUIDs
 	UFUNCTION(BlueprintPure, Category = "Dialogue|Context|History")
 	const TSet<int32>& GetVisitedNodeIndices() const { return History.VisitedNodeIndices; }
+#endif
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	// Returns the GUIDs which were visited inside this single context. For global data check DlgMemory
 	UFUNCTION(BlueprintPure, Category = "Dialogue|Context|History")
@@ -394,13 +400,17 @@ public:
 	UDlgNode* GetMutableNodeFromGUID(const FGuid& NodeGUID) const;
 	const UDlgNode* GetNodeFromGUID(const FGuid& NodeGUID) const;
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
 	// Was the node Index visited in the lifetime of this context?
 	// NOTE: you should  most likely use WasNodeGUIDVisitedInThisContext
-	UFUNCTION(BlueprintPure, Category = "Dialogue|Context|History", DisplayName = "Was Node Index Visited In This Context")
+	UFUNCTION(BlueprintPure, Category = "Dialogue|Context|History", DisplayName = "Was Node Index Visited In This Context", meta=(DeprecatedFunction))
 	bool WasNodeIndexVisitedInThisContext(int32 NodeIndex) const
 	{
 		return History.VisitedNodeIndices.Contains(NodeIndex);
 	}
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	// Was the node GUID visited in the lifetime of this context?
 	UFUNCTION(BlueprintPure, Category = "Dialogue|Context|History", DisplayName = "Was Node GUID Visited In This Context")
