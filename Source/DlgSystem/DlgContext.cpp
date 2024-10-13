@@ -23,10 +23,10 @@ UDlgContext::UDlgContext(const FObjectInitializer& ObjectInitializer)
 void UDlgContext::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ThisClass, Dialogue);
-	DOREPLIFETIME(ThisClass, SerializedParticipants);
 	//-----------------------------------------------------------------------------
 	// Torbie Begin Change
+	DOREPLIFETIME(ThisClass, SerializedParticipants);
+	DOREPLIFETIME(ThisClass, Dialogue);
 	DOREPLIFETIME(ThisClass, ActiveNodeIndex);
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
@@ -61,6 +61,14 @@ void UDlgContext::OnRep_ActiveNodeIndex(
 {
 	EnterNode(ActiveNodeIndex, {});
 }
+
+void UDlgContext::OnRep_Dialogue(
+	UDlgDialogue* PrevDialog
+	)
+{
+    EnterNode(ActiveNodeIndex, {});
+}
+
 // Torbie End Change
 //-----------------------------------------------------------------------------
 

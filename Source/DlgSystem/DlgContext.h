@@ -109,6 +109,9 @@ public:
 
 	UFUNCTION()
 	void OnRep_ActiveNodeIndex(int32 PrevActiveNodeIndex);
+
+	UFUNCTION()
+    void OnRep_Dialogue(UDlgDialogue* PrevDialogue);
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 
@@ -639,12 +642,15 @@ protected:
 	}
 
 protected:
-	// Current Dialogue used in this context at runtime.
-	UPROPERTY(Replicated)
-	UDlgDialogue* Dialogue = nullptr;
+    //-----------------------------------------------------------------------------
+    // Torbie Begin Change
+    // Helper array to serialize to Participants map for clients as well
+    UPROPERTY(Replicated, ReplicatedUsing = OnRep_SerializedParticipants)
+    TArray<UObject*> SerializedParticipants;
 
-	//-----------------------------------------------------------------------------
-	// Torbie Begin Change
+	// Current Dialogue used in this context at runtime.
+    UPROPERTY(Replicated, ReplicatedUsing = OnRep_Dialogue)
+	UDlgDialogue* Dialogue = nullptr;
 
 	// If a new dialogue is started on an exiting context, the OriginDialogue stores the
 	// original dialog.
@@ -656,10 +662,6 @@ protected:
 
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
-
-	// Helper array to serialize to Participants map for clients as well
-	UPROPERTY(Replicated, ReplicatedUsing = OnRep_SerializedParticipants)
-	TArray<UObject*> SerializedParticipants;
 
 	// All object is expected to implement the IDlgDialogueParticipant interface
 	// the key is the return value of IDlgDialogueParticipant::GetParticipantName()
