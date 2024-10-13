@@ -352,6 +352,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Dialogue|Context|History")
 	const TSet<int32>& GetVisitedNodeIndices() const { return History.VisitedNodeIndices; }
 #endif
+
+	UDlgDialogue* GetOriginDialogue() const { return OriginDialogue ? OriginDialogue : Dialogue; }
+
+	FGuid GetVisitingGuid() const { return GetOriginDialogue()->GetGUID(); }
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 
@@ -622,6 +626,11 @@ protected:
 	// The index of the active node in the dialogues Nodes array
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_ActiveNodeIndex)
 	int32 ActiveNodeIndex = INDEX_NONE;
+
+	// If a new dialogue is started on an exiting context, the OriginDialogue stores the
+	// original dialog.
+	UPROPERTY()
+	UDlgDialogue* OriginDialogue = nullptr;
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 

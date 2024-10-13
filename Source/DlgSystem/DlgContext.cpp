@@ -583,13 +583,22 @@ UDlgContext* UDlgContext::CreateCopy() const
 	Context->AllChildren = AllChildren;
 	Context->History = History;
 	Context->bDialogueEnded = bDialogueEnded;
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	Context->OriginDialogue = OriginDialogue;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	return Context;
 }
 
 void UDlgContext::SetNodeVisited(int32 NodeIndex, const FGuid& NodeGUID)
 {
-	FDlgMemory::Get().SetNodeVisited(Dialogue->GetGUID(), NodeIndex, NodeGUID);
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	FDlgMemory::Get().SetNodeVisited(GetVisitingGuid(), NodeIndex, NodeGUID);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 	History.Add(NodeIndex, NodeGUID);
 }
 
@@ -600,12 +609,20 @@ bool UDlgContext::IsNodeVisited(int32 NodeIndex, const FGuid& NodeGUID, bool bLo
 		return History.Contains(NodeIndex, NodeGUID);
 	}
 
-	return FDlgMemory::Get().IsNodeVisited(Dialogue->GetGUID(), NodeIndex, NodeGUID);
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	return FDlgMemory::Get().IsNodeVisited(GetVisitingGuid(), NodeIndex, NodeGUID);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 }
 
 FDlgNodeSavedData& UDlgContext::GetNodeSavedData(const FGuid& NodeGUID)
 {
-	return FDlgMemory::Get().FindOrAddEntry(Dialogue->GetGUID()).GetNodeData(NodeGUID);
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	return FDlgMemory::Get().FindOrAddEntry(GetVisitingGuid()).GetNodeData(NodeGUID);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 }
 
 UDlgNode_SpeechSequence* UDlgContext::GetMutableActiveNodeAsSpeechSequence() const
@@ -723,6 +740,17 @@ bool UDlgContext::StartWithContext(const FString& ContextString, UDlgDialogue* I
 		? TEXT("Start")
 		: FString::Printf(TEXT("%s - Start"), *ContextString);
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	if (!OriginDialogue)
+	{
+		OriginDialogue = Dialogue;
+	}
+
+	ActiveNodeIndex = 0;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	Dialogue = InDialogue;
 	SetParticipants(InParticipants);
 	if (!ValidateParticipantsMapForDialogue(ContextMessage, Dialogue, Participants))
@@ -766,6 +794,17 @@ bool UDlgContext::StartWithContextFromNode(
 	const FString ContextMessage = ContextString.IsEmpty()
 		? TEXT("StartFromNode")
 		: FString::Printf(TEXT("%s - StartFromNode"), *ContextString);
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	if (!OriginDialogue)
+	{
+		OriginDialogue = Dialogue;
+	}
+
+	ActiveNodeIndex = 0;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	Dialogue = InDialogue;
 	SetParticipants(InParticipants);
