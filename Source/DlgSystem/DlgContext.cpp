@@ -225,6 +225,24 @@ const FDlgEdgeData& UDlgContext::GetOptionFromAll(int32 Index) const
 	return AllChildren[Index];
 }
 
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+bool UDlgContext::HasValidActiveNodeParticipant() const
+{
+    const UDlgNode* Node = GetActiveNode();
+    if (!IsValid(Node))
+    {
+		return false;
+    }
+
+    const FName SpeakerName = Node->GetNodeParticipantName();
+    auto* ObjectPtr         = Participants.Find(SpeakerName);
+
+	return ObjectPtr && IsValid(*ObjectPtr);
+}
+// Torbie End Change
+//-----------------------------------------------------------------------------
+
 const FText& UDlgContext::GetActiveNodeText() const
 {
 	const UDlgNode* Node = GetActiveNode();

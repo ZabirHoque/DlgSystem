@@ -256,6 +256,13 @@ public:
 	// Active Node
 	//
 
+    //-----------------------------------------------------------------------------
+    // Torbie Begin Change
+	UFUNCTION(BlueprintPure, Category = "Dialogue|ActiveNode")
+    bool HasValidActiveNodeParticipant() const;
+    // Torbie End Change
+    //-----------------------------------------------------------------------------
+
 	// Gets the Text of the active node index
 	UFUNCTION(BlueprintPure, Category = "Dialogue|ActiveNode")
 	const FText& GetActiveNodeText() const;
