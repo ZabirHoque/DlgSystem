@@ -68,6 +68,39 @@ FReply SDlgGraphNode::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, co
 	return Super::OnMouseButtonDoubleClick(InMyGeometry, InMouseEvent);
 }
 
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+void SDlgGraphNode::MoveTo(
+	const FVector2D& NewPosition,
+	FNodeSet& NodeFilter,
+	bool bMarkDirty
+	)
+{
+	SDlgGraphNode_Base::MoveTo(NewPosition, NodeFilter, bMarkDirty);
+
+	bPendingNodeIndexUpdate = true;
+}
+
+void SDlgGraphNode::EndUserInteraction(
+	) const
+{
+	SDlgGraphNode_Base::EndUserInteraction();
+
+	if (!bPendingNodeIndexUpdate)
+	{
+		return;
+	}
+
+	if (UDlgDialogue* Dialogue = DialogueGraphNode->GetDialogue())
+	{
+		UDlgDialogue::GetDialogueEditorAccess()->CompileDialogueNodesFromGraphNodes(Dialogue);
+	}
+
+	bPendingNodeIndexUpdate = false;
+}
+// Torbie End Change
+//-----------------------------------------------------------------------------
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Begin SNodePanel::SNode Interface
 TArray<FOverlayWidgetInfo> SDlgGraphNode::GetOverlayWidgets(bool bSelected, const FVector2D& WidgetSize) const

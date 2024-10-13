@@ -51,6 +51,14 @@ public:
 
 	// Begin SNodePanel::SNode Interface
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	void MoveTo(const FVector2D& NewPosition, FNodeSet& NodeFilter, bool bMarkDirty) override;
+
+	void EndUserInteraction() const override;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	/** Populate the widgets array with any overlay widgets to render */
 	TArray<FOverlayWidgetInfo> GetOverlayWidgets(bool bSelected, const FVector2D& WidgetSize) const override;
 
@@ -214,4 +222,10 @@ protected:
 
 	/** The widget we use to display if the node has the GenericData variable set */
 	TSharedPtr<SWidget> GenericOverlayWidget;
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	mutable bool bPendingNodeIndexUpdate = false;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 };
