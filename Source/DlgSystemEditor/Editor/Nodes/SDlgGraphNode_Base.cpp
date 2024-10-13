@@ -87,6 +87,8 @@ TSharedPtr<SGraphPin> SDlgGraphNode_Base::CreatePinWidget(UEdGraphPin* Pin) cons
 	return SNew(SDlgGraphPin, Pin);
 }
 
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
 void SDlgGraphNode_Base::CreateEventAndConditionWidgets(TSharedPtr<SVerticalBox> TargetWidget)
 {
 	for (int32 i = 0; i < GetEnterConditions()->Num(); ++i)
@@ -98,11 +100,11 @@ void SDlgGraphNode_Base::CreateEventAndConditionWidgets(TSharedPtr<SVerticalBox>
 		.Padding(2.0f)
 		[
 			SNew(SBorder)
+			.Visibility(this, &Self::GetEventAndConditionVisibility)
 			.BorderImage(FNYAppStyle::GetBrush("BTEditor.Graph.BTNode.Body"))
 			.BorderBackgroundColor(Settings->GraphConditionBorderColor)
 			.HAlign(HAlign_Fill)
 			.VAlign(VAlign_Fill)
-			.Visibility(this, &Self::GetEventAndConditionVisibility)
 			.Padding(Settings->GraphConditionBorderSize)
 			[
 				SNew(SBorder)
@@ -123,13 +125,81 @@ void SDlgGraphNode_Base::CreateEventAndConditionWidgets(TSharedPtr<SVerticalBox>
 		];
 	}
 
-	const TArray<FDlgEvent>* EnterEventsPtr = GetEnterEvents();
-	if (EnterEventsPtr == nullptr)
+	if (const TArray<FDlgEvent>* EnterEventsPtr = GetEnterEvents())
 	{
-		return;
+		for (int32 i = 0; i < EnterEventsPtr->Num(); ++i)
+		{
+			TargetWidget->AddSlot()
+			.AutoHeight()
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Fill)
+			.Padding(2.0f)
+			[
+				SNew(SBorder)
+				.Visibility(this, &Self::GetEventAndConditionVisibility)
+				.BorderImage(FNYAppStyle::GetBrush("BTEditor.Graph.BTNode.Body"))
+				.BorderBackgroundColor(Settings->GraphEventBorderColor)
+				.HAlign(HAlign_Fill)
+				.VAlign(VAlign_Fill)
+				.Padding(Settings->GraphEventBorderSize)
+				[
+					SNew(SBorder)
+					.BorderImage(FNYAppStyle::GetBrush("BTEditor.Graph.BTNode.Body"))
+					.BorderBackgroundColor(Settings->GraphEventBackgroundColor)
+					.HAlign(HAlign_Fill)
+					.VAlign(VAlign_Fill)
+					.Padding(Settings->GraphEventTextMargin)
+					[
+						SNew(STextBlock)
+						.ColorAndOpacity(Settings->GraphEventTextColor)
+						.Text_Lambda([this, i]()
+						{
+							return FText::FromString((*GetEnterEvents())[i].GetEditorDisplayString(DialogueGraphNode_Base->GetDialogue()));
+						})
+					]
+				]
+			];
+		}
 	}
 
-	for (int32 i = 0; i < EnterEventsPtr->Num(); ++i)
+	if (const TArray<FDlgEvent>* ExitEventsPtr = GetExitEvents())
+	{
+		for (int32 i = 0; i < ExitEventsPtr->Num(); ++i)
+		{
+			TargetWidget->AddSlot()
+			.AutoHeight()
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Fill)
+			.Padding(2.0f)
+			[
+				SNew(SBorder)
+				.Visibility(this, &Self::GetEventAndConditionVisibility)
+				.BorderImage(FNYAppStyle::GetBrush("BTEditor.Graph.BTNode.Body"))
+				.BorderBackgroundColor(Settings->GraphEventBorderColor)
+				.HAlign(HAlign_Fill)
+				.VAlign(VAlign_Fill)
+				.Padding(Settings->GraphEventBorderSize)
+				[
+					SNew(SBorder)
+					.BorderImage(FNYAppStyle::GetBrush("BTEditor.Graph.BTNode.Body"))
+					.BorderBackgroundColor(Settings->GraphEventBackgroundColor)
+					.HAlign(HAlign_Fill)
+					.VAlign(VAlign_Fill)
+					.Padding(Settings->GraphEventTextMargin)
+					[
+						SNew(STextBlock)
+						.ColorAndOpacity(Settings->GraphEventTextColor)
+						.Text_Lambda([this, i]()
+						{
+							return FText::FromString((*GetExitEvents())[i].GetEditorDisplayString(DialogueGraphNode_Base->GetDialogue()));
+						})
+					]
+				]
+			];
+		}
+	}
+
+	if(const UDlgNodeData* NodeData = GetNodeData())
 	{
 		TargetWidget->AddSlot()
 		.AutoHeight()
@@ -154,15 +224,17 @@ void SDlgGraphNode_Base::CreateEventAndConditionWidgets(TSharedPtr<SVerticalBox>
 				[
 					SNew(STextBlock)
 					.ColorAndOpacity(Settings->GraphEventTextColor)
-					.Text_Lambda([this, i]()
+					.Text_Lambda([this]()
 					{
-						return FText::FromString((*GetEnterEvents())[i].GetEditorDisplayString(DialogueGraphNode_Base->GetDialogue()));
+						return FText::FromString(FString::Printf(TEXT("%s (Data)"), *GetNodeData()->GetEditorDisplayString(DialogueGraphNode_Base->GetDialogue())));
 					})
 				]
 			]
 		];
 	}
 }
+// Torbie End Change
+//-----------------------------------------------------------------------------
 
 void SDlgGraphNode_Base::AddPin(const TSharedRef<SGraphPin>& PinToAdd)
 {

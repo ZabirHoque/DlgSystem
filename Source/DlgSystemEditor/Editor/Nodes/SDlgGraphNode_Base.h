@@ -63,6 +63,12 @@ protected:
 
 	virtual const TArray<FDlgCondition>* GetEnterConditions() const { return nullptr; }
 	virtual const TArray<FDlgEvent>* GetEnterEvents() const { return nullptr; }
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	virtual const TArray<FDlgEvent>* GetExitEvents() const { return nullptr; }
+	virtual const UDlgNodeData* GetNodeData() const { return nullptr; };
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 private:
 	/** Tells us if the provided pin is valid.  */

@@ -80,6 +80,12 @@ public:
 
 	virtual const TArray<FDlgCondition>* GetEnterConditions() const override;
 	virtual const TArray<FDlgEvent>* GetEnterEvents() const override;
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	const TArray<FDlgEvent>* GetExitEvents() const override;
+	const UDlgNodeData* GetNodeData() const override;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	// End SDlgGraphNode_Base Interface
 

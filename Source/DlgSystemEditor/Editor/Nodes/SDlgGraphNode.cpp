@@ -360,6 +360,20 @@ const TArray<FDlgEvent>* SDlgGraphNode::GetEnterEvents() const
 	return &DialogueGraphNode->GetDialogueNode().GetNodeEnterEvents();
 }
 
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+const TArray<FDlgEvent>* SDlgGraphNode::GetExitEvents() const
+{
+	return &DialogueGraphNode->GetDialogueNode().GetNodeExitEvents();
+}
+
+const UDlgNodeData* SDlgGraphNode::GetNodeData() const
+{
+	return DialogueGraphNode->GetDialogueNode().GetNodeData();
+}
+// Torbie End Change
+//-----------------------------------------------------------------------------
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Begin own functions
 TSharedRef<SWidget> SDlgGraphNode::GetNodeBodyWidget()

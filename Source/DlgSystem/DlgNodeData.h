@@ -11,6 +11,23 @@ UCLASS(Blueprintable, BlueprintType, Abstract, EditInlineNew)
 class DLGSYSTEM_API UDlgNodeData : public UDlgObject
 {
 	GENERATED_BODY()
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+public:
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Dialogue")
+	FString GetEditorDisplayString(UDlgDialogue* OwnerDialogue) const;
+
+	virtual FString GetEditorDisplayString_Implementation(UDlgDialogue* OwnerDialogue) const
+	{
+#if WITH_EDITOR
+		return GetClass()->GetDisplayNameText().ToString();
+#else
+		return GetName();
+#endif
+	}
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 };
 
 // This is the same as UDlgNodeData but it does NOT show any categories
