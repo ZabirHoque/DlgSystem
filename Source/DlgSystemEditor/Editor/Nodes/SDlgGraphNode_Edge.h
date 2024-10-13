@@ -109,6 +109,12 @@ protected:
 
 	//-----------------------------------------------------------------------------
 	// Torbie Begin Change
+	/** The styles applied to this node's text */
+	TSharedPtr<FSlateStyleSet> StyleInstance;
+
+	/** Text decorators applied to this node's text */
+	TArray<TSharedRef<class ITextDecorator>> TextDecorators;
+
 	/** The widget we use to display if the edge has any text */
 	TSharedPtr<SWidget> TextOverlayWidget;
 	// Torbie End Change

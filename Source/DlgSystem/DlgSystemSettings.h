@@ -313,6 +313,9 @@ public:
 
 	UPROPERTY(Category = "Dialogue Node Data", Config, EditAnywhere)
 	TArray<TSoftClassPtr<class URichTextBlockDecorator>> TextDecoratorClasses;
+
+	UPROPERTY(Category = "Dialogue Node Data", Config, EditAnywhere, meta = (RequiredAssetDataTags="RowStructure=/Script/UMG.RichTextStyleRow"))
+	TSoftObjectPtr<UDataTable> TextStyleSet;
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 

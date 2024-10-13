@@ -538,7 +538,8 @@ TSharedRef<SWidget> SDlgGraphNode::GetDescriptionWidget()
 
 	//-----------------------------------------------------------------------------
 	// Torbie Begin Change
-	TArray<TSharedRef<ITextDecorator>> TextDecorators;
+	StyleInstance = FDlgHelper::CreateTextDecoratorStyle();
+
 	FDlgHelper::CreateTextDecorators(TextDecorators);
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
@@ -582,6 +583,7 @@ TSharedRef<SWidget> SDlgGraphNode::GetDescriptionWidget()
 							// Torbie Begin Change
 							SNew(SRichTextBlock)
 							.Decorators(TextDecorators)
+							.DecoratorStyleSet(StyleInstance.Get())
 							.Visibility(this, &Self::GetDescriptionVisibility)
 							.Text(this, &Self::GetDescriptionForSpeechSequenceEntryAt, EntryIndex)
 							.WrapTextAt(Settings->DescriptionWrapTextAt)
@@ -600,6 +602,7 @@ TSharedRef<SWidget> SDlgGraphNode::GetDescriptionWidget()
 		// Torbie Begin Change
 		DescriptionWidget = SNew(SRichTextBlock)
 			.Decorators(TextDecorators)
+			.DecoratorStyleSet(StyleInstance.Get())
 			.Visibility(this, &Self::GetDescriptionVisibility)
 			.Text(this, &Self::GetDescription)
 			.WrapTextAt(Settings->DescriptionWrapTextAt)

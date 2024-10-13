@@ -251,7 +251,8 @@ void SDlgGraphNode_Edge::UpdateGraphNode()
 
 	//-----------------------------------------------------------------------------
 	// Torbie Begin Change
-	TArray<TSharedRef<ITextDecorator>> TextDecorators;
+	StyleInstance = FDlgHelper::CreateTextDecoratorStyle();
+
 	FDlgHelper::CreateTextDecorators(TextDecorators);
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
@@ -262,6 +263,7 @@ void SDlgGraphNode_Edge::UpdateGraphNode()
 		// Torbie Begin Change
 		SNew(SRichTextBlock)
 		.Decorators(TextDecorators)
+		.DecoratorStyleSet(StyleInstance.Get())
 		.Text(this, &Self::GetEdgeText)
 		.WrapTextAt(Settings->GraphEdgeTextWrapAt)
 		.Margin(Settings->GraphEdgeTextMargin)

@@ -543,6 +543,8 @@ public:
 
 	//-----------------------------------------------------------------------------
 	// Torbie Begin Change
+	static TSharedPtr<FSlateStyleSet> CreateTextDecoratorStyle();
+	
 	static void CreateTextDecorators(TArray<TSharedRef<class ITextDecorator>>& OutDecorators);
 	// Torbie End Change
 	//-----------------------------------------------------------------------------

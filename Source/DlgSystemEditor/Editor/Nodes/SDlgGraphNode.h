@@ -231,6 +231,12 @@ protected:
 
 	//-----------------------------------------------------------------------------
 	// Torbie Begin Change
+	/** The styles applied to this node's text */
+	TSharedPtr<FSlateStyleSet> StyleInstance;
+	
+	/** Text decorators applied to this node's text */
+	TArray<TSharedRef<class ITextDecorator>> TextDecorators;
+
 	mutable bool bPendingNodeIndexUpdate = false;
 	// Torbie End Change
 	//-----------------------------------------------------------------------------

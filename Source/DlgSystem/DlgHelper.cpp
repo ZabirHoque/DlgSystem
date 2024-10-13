@@ -12,6 +12,7 @@
 #include "Framework/Docking/TabManager.h"
 //-----------------------------------------------------------------------------
 // Torbie Begin Change
+#include "Components/RichTextBlock.h"
 #include "Components/RichTextBlockDecorator.h"
 // Torbie End Change
 //-----------------------------------------------------------------------------
@@ -299,6 +300,35 @@ TMap<FName, TArray<FDlgClassAndObject>> FDlgHelper::ConvertDialogueParticipantsC
 
 //-----------------------------------------------------------------------------
 // Torbie Begin Change
+TSharedPtr<FSlateStyleSet> FDlgHelper::CreateTextDecoratorStyle(
+	)
+{
+	FName FallbackFontStyleName  = "NormalFont";
+	FName FallbackColorStyleName = "Colors.AccentOrange";
+
+	FSlateFontInfo DefaultFont = FAppStyle::Get().GetFontStyle(FallbackFontStyleName);
+	FLinearColor DefaultColor  = FAppStyle::Get().GetSlateColor(FallbackColorStyleName).GetSpecifiedColor();
+
+	FTextBlockStyle TextBlockStyle;
+	TextBlockStyle.SetFont(DefaultFont);
+	TextBlockStyle.SetColorAndOpacity(DefaultColor);
+
+	auto* Settings = GetDefault<UDlgSystemSettings>();
+
+	TSharedPtr<FSlateStyleSet> StyleInstance = MakeShareable(new FSlateStyleSet(TEXT("RichTextStyle")));
+
+	if (Settings->TextStyleSet && Settings->TextStyleSet->GetRowStruct()->IsChildOf(FRichTextStyleRow::StaticStruct()))
+	{
+		for (const auto& Entry : Settings->TextStyleSet->GetRowMap())
+		{
+			FName SubStyleName = Entry.Key;
+			StyleInstance->Set(SubStyleName, TextBlockStyle);
+		}
+	}
+
+	return StyleInstance;
+}
+
 void FDlgHelper::CreateTextDecorators(
 	TArray<TSharedRef<ITextDecorator>>& OutDecorators
 	)
