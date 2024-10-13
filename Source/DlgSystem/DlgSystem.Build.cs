@@ -30,7 +30,13 @@ public class DlgSystem : ModuleRules
 			new string[] {
 				"Core",
 				"Json",
-				"JsonUtilities"
+				"JsonUtilities",
+				//-----------------------------------------------------------------------------
+				// Torbie Begin Change
+				// URichTextBlock
+				"UMG",
+				// Torbie End Change
+				//-----------------------------------------------------------------------------
 				// ... add other public dependencies that you statically link with here ...
 			});
 

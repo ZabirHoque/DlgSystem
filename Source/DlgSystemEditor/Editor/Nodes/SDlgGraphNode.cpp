@@ -9,6 +9,13 @@
 #include "SLevelOfDetailBranchNode.h"
 #include "IDocumentation.h"
 #include "GraphEditorDragDropAction.h"
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+#include "Framework/Text/ITextDecorator.h"
+#include "Widgets/Text/SRichTextBlock.h"
+#include "DlgSystem/DlgHelper.h"
+// Torbie End Change
+//-----------------------------------------------------------------------------
 
 #include "SDlgNodeOverlayWidget.h"
 #include "SDlgGraphPin.h"
@@ -515,6 +522,13 @@ TSharedRef<SWidget> SDlgGraphNode::GetDescriptionWidget()
 		return DescriptionWidget.ToSharedRef();
 	}
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	TArray<TSharedRef<ITextDecorator>> TextDecorators;
+	FDlgHelper::CreateTextDecorators(TextDecorators);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	if (DialogueGraphNode->IsSpeechSequenceNode())
 	{
 		TSharedPtr<SVerticalBox> VerticalBox = SNew(SVerticalBox);
@@ -550,11 +564,16 @@ TSharedRef<SWidget> SDlgGraphNode::GetDescriptionWidget()
 						+SVerticalBox::Slot()
 						.AutoHeight()
 						[
-							SNew(STextBlock)
+							//-----------------------------------------------------------------------------
+							// Torbie Begin Change
+							SNew(SRichTextBlock)
+							.Decorators(TextDecorators)
 							.Visibility(this, &Self::GetDescriptionVisibility)
 							.Text(this, &Self::GetDescriptionForSpeechSequenceEntryAt, EntryIndex)
 							.WrapTextAt(Settings->DescriptionWrapTextAt)
 							.Margin(Settings->DescriptionTextMargin)
+							// Torbie End Change
+							//-----------------------------------------------------------------------------
 						]
 					]
 				];
@@ -563,11 +582,16 @@ TSharedRef<SWidget> SDlgGraphNode::GetDescriptionWidget()
 	}
 	else
 	{
-		DescriptionWidget = SNew(STextBlock)
+		//-----------------------------------------------------------------------------
+		// Torbie Begin Change
+		DescriptionWidget = SNew(SRichTextBlock)
+			.Decorators(TextDecorators)
 			.Visibility(this, &Self::GetDescriptionVisibility)
 			.Text(this, &Self::GetDescription)
 			.WrapTextAt(Settings->DescriptionWrapTextAt)
 			.Margin(Settings->DescriptionTextMargin);
+		// Torbie End Change
+		//-----------------------------------------------------------------------------
 	}
 
 	return DescriptionWidget.ToSharedRef();

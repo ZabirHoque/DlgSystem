@@ -540,4 +540,10 @@ public:
 
 		return IsValid(Object);
 	}
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	static void CreateTextDecorators(TArray<TSharedRef<class ITextDecorator>>& OutDecorators);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 };

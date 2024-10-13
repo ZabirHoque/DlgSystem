@@ -7,6 +7,13 @@
 #include "Widgets/SToolTip.h"
 #include "Widgets/Layout/SBox.h"
 #include "Runtime/Launch/Resources/Version.h"
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+#include "Framework/Text/ITextDecorator.h"
+#include "Widgets/Text/SRichTextBlock.h"
+#include "DlgSystem/DlgHelper.h"
+// Torbie End Change
+//-----------------------------------------------------------------------------
 
 #include "DialogueGraphNode.h"
 #include "SDlgNodeOverlayWidget.h"
@@ -112,7 +119,7 @@ TArray<FOverlayWidgetInfo> SDlgGraphNode_Edge::GetOverlayWidgets(bool bSelected,
 	// Torbie Begin Change
 	if (TextOverlayWidget.IsValid())
 	{
-		if (Settings->bShowEdgeHasTextIcon && DialogueGraphNode_Edge->HasDialogueEdgeText())
+		if (Settings->bShowEdgeHasTextIcon && !Settings->bShowEdgeText && DialogueGraphNode_Edge->HasDialogueEdgeText())
 		{
 			FOverlayWidgetInfo Overlay(TextOverlayWidget);
 			// Position on the top/right of the node
@@ -242,13 +249,24 @@ void SDlgGraphNode_Edge::UpdateGraphNode()
 
 	CreateEventAndConditionWidgets(EdgeTextVerticalBox);
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	TArray<TSharedRef<ITextDecorator>> TextDecorators;
+	FDlgHelper::CreateTextDecorators(TextDecorators);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	EdgeTextVerticalBox->AddSlot()
 	[
-		SNew(STextBlock)
-		.ColorAndOpacity(Settings->GraphEdgeTextColor)
+		//-----------------------------------------------------------------------------
+		// Torbie Begin Change
+		SNew(SRichTextBlock)
+		.Decorators(TextDecorators)
 		.Text(this, &Self::GetEdgeText)
 		.WrapTextAt(Settings->GraphEdgeTextWrapAt)
 		.Margin(Settings->GraphEdgeTextMargin)
+		// Torbie End Change
+		//-----------------------------------------------------------------------------
 	];
 }
 

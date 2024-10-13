@@ -10,6 +10,11 @@
 #include "Misc/Paths.h"
 #include "UObject/UObjectIterator.h"
 #include "Framework/Docking/TabManager.h"
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+#include "Components/RichTextBlockDecorator.h"
+// Torbie End Change
+//-----------------------------------------------------------------------------
 
 bool FDlgHelper::DeleteFile(const FString& PathName, bool bVerbose)
 {
@@ -291,3 +296,33 @@ TMap<FName, TArray<FDlgClassAndObject>> FDlgHelper::ConvertDialogueParticipantsC
 
 	return ObjectsMap;
 }
+
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+void FDlgHelper::CreateTextDecorators(
+	TArray<TSharedRef<ITextDecorator>>& OutDecorators
+	)
+{
+	auto* Settings = GetDefault<UDlgSystemSettings>();
+
+	for (const TSoftClassPtr<URichTextBlockDecorator>& DecoratorClass : Settings->TextDecoratorClasses)
+	{
+		if (UClass* ResolvedClass = DecoratorClass.Get())
+		{
+			if (ResolvedClass->HasAnyClassFlags(CLASS_Abstract))
+			{
+				continue;
+			}
+
+			auto* Decorator = GetMutableDefault<URichTextBlockDecorator>(ResolvedClass);
+
+			TSharedPtr<ITextDecorator> TextDecorator = Decorator->CreateDecorator(nullptr);
+			if (TextDecorator.IsValid())
+			{
+				OutDecorators.Add(TextDecorator.ToSharedRef());
+			}
+		}
+	}
+}
+// Torbie End Change
+//-----------------------------------------------------------------------------

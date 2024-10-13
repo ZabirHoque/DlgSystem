@@ -310,6 +310,9 @@ public:
 	// Torbie Begin Change
 	UPROPERTY(Category = "Dialogue Node Data", Config, EditAnywhere)
 	TArray<FName> DefaultParticipantOptions;
+
+	UPROPERTY(Category = "Dialogue Node Data", Config, EditAnywhere)
+	TArray<TSoftClassPtr<class URichTextBlockDecorator>> TextDecoratorClasses;
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 
