@@ -145,6 +145,15 @@ bool UDlgNode::HandleNodeEnter(UDlgContext& Context, TSet<const UDlgNode*> Nodes
 
 void UDlgNode::FireNodeEnterEvents(UDlgContext& Context)
 {
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	if (Context.IsSimulatedStart())
+	{
+		return;
+	}
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	for (const FDlgEvent& Event : EnterEvents)
 	{
 		// Get Participant from either event or parent
@@ -162,6 +171,11 @@ void UDlgNode::FireNodeEnterEvents(UDlgContext& Context)
 // Torbie Begin Change
 void UDlgNode::FireNodeExitEvents(UDlgContext& Context)
 {
+	if (Context.IsSimulatedStart())
+	{
+		return;
+	}
+
 	for (const FDlgEvent& Event : ExitEvents)
 	{
 		// Get Participant from either event or parent

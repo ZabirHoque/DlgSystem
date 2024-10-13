@@ -11,6 +11,7 @@
 #include "DlgSystem/Nodes/DlgNode_Proxy.h"
 //-----------------------------------------------------------------------------
 // Torbie Begin Change
+#include "DlgSystem/Nodes/DlgNode_Start.h"
 #include "DlgSystemEditor/DlgSystemEditorModule.h"
 // Torbie End Change
 //-----------------------------------------------------------------------------
@@ -130,6 +131,23 @@ void FDlgGraphNode_Details::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder
 	// Do nothing
 	if (bIsRootNode)
 	{
+        //-----------------------------------------------------------------------------
+        // Torbie Begin Change
+
+        // Node Data that can be anything set by the user
+        NodeDataPropertyRow = &BaseDataCategory.AddProperty(
+            PropertyDialogueNode->GetChildHandle(UDlgNode_Start::GetMemberNameNodeData())
+            );
+
+        NodeDataPropertyRow->Visibility(
+            CREATE_VISIBILITY_CALLBACK_STATIC(&FDlgDetailsPanelUtils::GetNodeDataVisibility)
+            );
+
+        NodeDataPropertyRow->ShouldAutoExpand(true);
+        NodeDataPropertyRow->ShowPropertyButtons(true);
+        // Torbie End Change
+        //-----------------------------------------------------------------------------
+
 		return;
 	}
 
@@ -283,7 +301,8 @@ void FDlgGraphNode_Details::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder
 		// Node Data that can be anything set by the user
 		NodeDataPropertyRow = &EndDataCategory.AddProperty(
 			PropertyDialogueNode->GetChildHandle(UDlgNode_End::GetMemberNameNodeData())
-		);
+			);
+
 		NodeDataPropertyRow->Visibility(CREATE_VISIBILITY_CALLBACK_STATIC(&FDlgDetailsPanelUtils::GetNodeDataVisibility));
 		NodeDataPropertyRow->ShouldAutoExpand(true);
 		NodeDataPropertyRow->ShowPropertyButtons(true);

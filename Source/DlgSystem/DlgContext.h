@@ -351,17 +351,19 @@ public:
 	// NOTE: You should use GetVisitedNodeGUIDs
 	UFUNCTION(BlueprintPure, Category = "Dialogue|Context|History")
 	const TSet<int32>& GetVisitedNodeIndices() const { return History.VisitedNodeIndices; }
-#endif
-
-	UDlgDialogue* GetOriginDialogue() const { return OriginDialogue ? OriginDialogue : Dialogue; }
-
-	FGuid GetVisitingGuid() const { return GetOriginDialogue()->GetGUID(); }
-	// Torbie End Change
-	//-----------------------------------------------------------------------------
 
 	// Returns the GUIDs which were visited inside this single context. For global data check DlgMemory
 	UFUNCTION(BlueprintPure, Category = "Dialogue|Context|History")
 	const TSet<FGuid>& GetVisitedNodeGUIDs() const { return History.VisitedNodeGUIDs; }
+#endif
+
+	// Returns the GUIDs which were visited inside this single context. For global data check DlgMemory
+	UFUNCTION(BlueprintPure, Category = "Dialogue|Context|History")
+	const TArray<FGuid>& GetVisitedNodeGUIDs() const { return History.VisitedNodeGUIDs; }
+
+	UDlgMemory* GetMemory() const { return Memory; }
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	// Helper methods to get some Dialogue properties
 	UFUNCTION(BlueprintPure, Category = "Dialogue|Data")
@@ -379,6 +381,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Dialogue|Data")
 	const TMap<FName, UObject*>& GetParticipants() const { return Participants; }
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	UDlgDialogue* GetOriginDialogue() const { return OriginDialogue ? OriginDialogue : Dialogue; }
+
+	FGuid GetVisitingGuid() const { return GetOriginDialogue()->GetGUID(); }
+
+	bool IsSimulatedStart() const { return bIsSimulatedStart; }
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	// the Dialogue jumps to the defined node, or the function returns with false, if the conversation is over
 	// the Dialogue jumps to the defined node, or the function returns with false if the conversation is over
@@ -408,11 +419,13 @@ public:
 	// Torbie Begin Change
 	// Was the node Index visited in the lifetime of this context?
 	// NOTE: you should  most likely use WasNodeGUIDVisitedInThisContext
+#if 0
 	UFUNCTION(BlueprintPure, Category = "Dialogue|Context|History", DisplayName = "Was Node Index Visited In This Context", meta=(DeprecatedFunction))
 	bool WasNodeIndexVisitedInThisContext(int32 NodeIndex) const
 	{
 		return History.VisitedNodeIndices.Contains(NodeIndex);
 	}
+#endif
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 
@@ -430,11 +443,16 @@ public:
 	// return false if they are not satisfied or if the index is invalid
 	bool IsNodeEnterable(int32 NodeIndex, TSet<const UDlgNode*> AlreadyVisitedNodes) const;
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+
 	// Initializes/Starts the context, the first (start) node is selected and the first valid child node is entered.
 	// Called by the UDlgManager which creates the context
-	bool Start(UDlgDialogue* InDialogue, const TMap<FName, UObject*>& InParticipants) { return StartWithContext(TEXT(""), InDialogue, InParticipants); }
-	bool StartWithContext(const FString& ContextString, UDlgDialogue* InDialogue, const TMap<FName, UObject*>& InParticipants);
+	bool Start(UDlgDialogue* InDialogue, const TMap<FName, UObject*>& InParticipants, UDlgMemory* InMemory) { return StartWithContext(TEXT(""), InDialogue, InParticipants, InMemory); }
+	bool StartWithContext(const FString& ContextString, UDlgDialogue* InDialogue, const TMap<FName, UObject*>& InParticipants, UDlgMemory* InMemory);
 
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 	//
 	// Initializes/Start the context using the given node as entry point
 	// This is useful to resume a dialogue
@@ -560,8 +578,14 @@ public:
 	// Create a copy of the current Context
 	UDlgContext* CreateCopy() const;
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+
 	// Checks if the context could be started, used to check if there is any reachable node from the start node
-	static bool CanBeStarted(UDlgDialogue* InDialogue, const TMap<FName, UObject*>& InParticipants);
+	static const UDlgNode* CanBeStarted(UDlgDialogue* InDialogue, const TMap<FName, UObject*>& InParticipants, UDlgMemory* InMemory);
+
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	UFUNCTION(BlueprintPure, Category = "Dialogue|Context")
 	FString GetContextString() const;
@@ -612,6 +636,20 @@ protected:
 	UPROPERTY(Replicated)
 	UDlgDialogue* Dialogue = nullptr;
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+
+	// If a new dialogue is started on an exiting context, the OriginDialogue stores the
+	// original dialog.
+	UPROPERTY()
+	UDlgDialogue* OriginDialogue = nullptr;
+
+	UPROPERTY()
+	const UDlgNode* OriginStartNode = nullptr;
+
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	// Helper array to serialize to Participants map for clients as well
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_SerializedParticipants)
 	TArray<UObject*> SerializedParticipants;
@@ -620,19 +658,6 @@ protected:
 	// the key is the return value of IDlgDialogueParticipant::GetParticipantName()
 	UPROPERTY()
 	TMap<FName, UObject*> Participants;
-
-	//-----------------------------------------------------------------------------
-	// Torbie Begin Change
-	// The index of the active node in the dialogues Nodes array
-	UPROPERTY(Replicated, ReplicatedUsing = OnRep_ActiveNodeIndex)
-	int32 ActiveNodeIndex = INDEX_NONE;
-
-	// If a new dialogue is started on an exiting context, the OriginDialogue stores the
-	// original dialog.
-	UPROPERTY()
-	UDlgDialogue* OriginDialogue = nullptr;
-	// Torbie End Change
-	//-----------------------------------------------------------------------------
 
 	// Options of the active node with satisfied conditions - the options the player can choose from
 	TArray<FDlgEdge> AvailableChildren;
@@ -644,10 +669,34 @@ protected:
 	 */
 	TArray<FDlgEdgeData> AllChildren;
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	UPROPERTY()
+	UDlgMemory* Memory = nullptr;
+
+	FDlgNodeSavedData NodeSavedDataFallback;
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	// Node indices visited in this specific Dialogue instance (isn't serialized)
 	// History for this Context only
 	FDlgHistory History;
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+
+	// The index of the active node in the dialogues Nodes array
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_ActiveNodeIndex)
+	int32 ActiveNodeIndex = INDEX_NONE;
+
 	// cache the result of the last ChooseOption call
-	bool bDialogueEnded = false;
+	UPROPERTY()
+	uint8 bDialogueEnded : 1;
+
+	// If simulating start, side effects (fire enter/exit events, histroy) do not occur.
+	UPROPERTY()
+	uint8 bIsSimulatedStart : 1;
+
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 };

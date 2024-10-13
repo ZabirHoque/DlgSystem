@@ -47,8 +47,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|Launch", meta = (WorldContext = "WorldContextObject"))
 	static UDlgContext* StartDialogueWithDefaultParticipants(UObject* WorldContextObject, UDlgDialogue* Dialogue);
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+
 	// Supplies where we called this from
-	static UDlgContext* StartDialogueWithContext(const FString& ContextString, UDlgDialogue* Dialogue, const TArray<UObject*>& Participants);
+	static UDlgContext* StartDialogueWithContext(const FString& ContextString, UDlgDialogue* Dialogue, const TArray<UObject*>& Participants, UDlgMemory* Memory);
+
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
 
 	/**
 	 * Starts a Dialogue with the provided Dialogue and Participants array
@@ -60,10 +70,16 @@ public:
 	 * @returns The dialogue context object or nullptr if something wrong happened
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|Launch")
-	static UDlgContext* StartDialogue(UDlgDialogue* Dialogue, UPARAM(ref)const TArray<UObject*>& Participants)
+	static UDlgContext* StartDialogue(UDlgDialogue* Dialogue, UPARAM(ref)const TArray<UObject*>& Participants, UDlgMemory* Memory)
 	{
-		return StartDialogueWithContext(TEXT("StartDialogue"), Dialogue, Participants);
+		return StartDialogueWithContext(TEXT("StartDialogue"), Dialogue, Participants, Memory);
 	}
+
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
 
 	/**
 	 * Checks if there is any child of the start node which can be enterred based on the conditions
@@ -71,7 +87,10 @@ public:
 	 * @returns true if there is an enterable node from the start node
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|Launch")
-	static bool CanStartDialogue(UDlgDialogue* Dialogue, UPARAM(ref)const TArray<UObject*>& Participants);
+	static const UDlgNode* CanStartDialogue(UDlgDialogue* Dialogue, UPARAM(ref)const TArray<UObject*>& Participants, UDlgMemory* Memory);
+
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	/**
 	 * Starts a Dialogue with the provided Dialogue and Participants array, at the given entry point
@@ -98,7 +117,11 @@ public:
 		UDlgDialogue* Dialogue,
 		UPARAM(ref)const TArray<UObject*>& Participants,
 		UPARAM(DisplayName="Start Node Index") int32 StartIndex,
-		const TSet<int32>& AlreadyVisitedNodes,
+		//-----------------------------------------------------------------------------
+		// Torbie Begin Change
+		const TSet<FGuid>& AlreadyVisitedNodes,
+		// Torbie End Change
+		//-----------------------------------------------------------------------------
 		bool bFireEnterEvents
 	);
 
@@ -134,25 +157,31 @@ public:
 	// Helper methods, same as StartDialogue but with fixed amount of participant(s)
 	//
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+
 	// Helper methods that allows you to start a Dialogue with only a participant
 	// For N Participants just use StartDialogue
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|Launch")
-	static UDlgContext* StartMonologue(UDlgDialogue* Dialogue, UObject* Participant);
+	static UDlgContext* StartMonologue(UDlgDialogue* Dialogue, UDlgMemory* Memory, UObject* Participant);
 
 	// Helper methods that allows you to start a Dialogue with 2 participants
 	// For N Participants just use StartDialogue
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|Launch")
-	static UDlgContext* StartDialogue2(UDlgDialogue* Dialogue, UObject* Participant0, UObject* Participant1);
+	static UDlgContext* StartDialogue2(UDlgDialogue* Dialogue, UDlgMemory* Memory, UObject* Participant0, UObject* Participant1);
 
 	// Helper methods that allows you to start a Dialogue with 3 participants
 	// For N Participants just use StartDialogue
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|Launch")
-	static UDlgContext* StartDialogue3(UDlgDialogue* Dialogue, UObject* Participant0, UObject* Participant1, UObject* Participant2);
+	static UDlgContext* StartDialogue3(UDlgDialogue* Dialogue, UDlgMemory* Memory, UObject* Participant0, UObject* Participant1, UObject* Participant2);
 
 	// Helper methods that allows you to start a Dialogue with 4 participants
 	// For N Participants just use StartDialogue
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|Launch")
-	static UDlgContext* StartDialogue4(UDlgDialogue* Dialogue, UObject* Participant0, UObject* Participant1, UObject* Participant2, UObject* Participant3);
+	static UDlgContext* StartDialogue4(UDlgDialogue* Dialogue, UDlgMemory* Memory, UObject* Participant0, UObject* Participant1, UObject* Participant2, UObject* Participant3);
+
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	/**
 	 * Loads all dialogues from the filesystem into memory
@@ -188,13 +217,6 @@ public:
 	// Sets the FDlgMemory Dialogue history.
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|Memory")
 	static void SetDialogueHistory(const TMap<FGuid, FDlgHistory>& DlgHistory);
-
-	//-----------------------------------------------------------------------------
-	// Torbie Begin Change
-	// Allow directing dialog history to instance of history.
-	static void SetDialogueHistoryOverride(TMap<FGuid, FDlgHistory>* DlgHistory);
-	// Torbie End Change
-	//-----------------------------------------------------------------------------
 
 	// Empties the FDlgMemory Dialogue history.
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|Memory")

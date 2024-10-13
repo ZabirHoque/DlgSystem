@@ -5,7 +5,7 @@
 
 #include "DlgMemory.generated.h"
 
-
+#if 0
 // Struct to store any data a node might want to read/write
 USTRUCT(BlueprintType)
 struct DLGSYSTEM_API FDlgNodeSavedData
@@ -112,16 +112,16 @@ public:
 	}
 
 	// Removes all entries
-	void Empty() { GetHistoryMap().Empty(); }
+	void Empty() { HistoryMap.Empty(); }
 
 	// Adds an entry to the map or overrides an existing one
 	void SetEntry(const FGuid& DialogueGUID, const FDlgHistory& History)
 	{
-		FDlgHistory* OldEntry = GetHistoryMap().Find(DialogueGUID);
+		FDlgHistory* OldEntry = HistoryMap.Find(DialogueGUID);
 
 		if (OldEntry == nullptr)
 		{
-			GetHistoryMap().Add(DialogueGUID, History);
+			HistoryMap.Add(DialogueGUID, History);
 		}
 		else
 		{
@@ -130,21 +130,21 @@ public:
 	}
 
 	// Returns the entry for the given name, or nullptr if it does not exist */
-	FDlgHistory* GetEntry(const FGuid& DialogueGUID) { return GetHistoryMap().Find(DialogueGUID); }
+	FDlgHistory* GetEntry(const FGuid& DialogueGUID) { return HistoryMap.Find(DialogueGUID); }
 
-	FDlgHistory& FindOrAddEntry(const FGuid& DialogueGUID) { return GetHistoryMap().FindOrAdd(DialogueGUID); }
+	FDlgHistory& FindOrAddEntry(const FGuid& DialogueGUID) { return HistoryMap.FindOrAdd(DialogueGUID); }
 
 	void SetNodeVisited(const FGuid& DialogueGUID, int32 NodeIndex, const FGuid& NodeGUID)
 	{
 		// Add it if it does not exist already
-		FDlgHistory& History = GetHistoryMap().FindOrAdd(DialogueGUID);
+		FDlgHistory& History = HistoryMap.FindOrAdd(DialogueGUID);
 		History.Add(NodeIndex, NodeGUID);
 	}
 
 	bool IsNodeVisited(const FGuid& DialogueGUID, int32 NodeIndex, const FGuid& NodeGUID) const
 	{
 		// Dialogue entry does not even exist
-		const FDlgHistory* History = GetHistoryMap().Find(DialogueGUID);
+		const FDlgHistory* History = HistoryMap.Find(DialogueGUID);
 		if (History == nullptr)
 		{
 			return false;
@@ -153,13 +153,10 @@ public:
 		return History->Contains(NodeIndex, NodeGUID);
 	}
 
-	//-----------------------------------------------------------------------------
-	// Torbie Begin Change
-#if 0
   	bool IsNodeIndexVisited(const FGuid& DialogueGUID, int32 NodeIndex) const
 	{
 		// Dialogue entry does not even exist
-		const FDlgHistory* History = GetHistoryMap().Find(DialogueGUID);
+		const FDlgHistory* History = HistoryMap.Find(DialogueGUID);
 		if (History == nullptr)
 		{
 			return false;
@@ -167,14 +164,11 @@ public:
 
 		return History->VisitedNodeIndices.Contains(NodeIndex);
 	}
-#endif
-	// Torbie End Change
-	//-----------------------------------------------------------------------------
 
 	bool IsNodeGUIDVisited(const FGuid& DialogueGUID, const FGuid& NodeGUID) const
 	{
 		// Dialogue entry does not even exist
-		const FDlgHistory* History = GetHistoryMap().Find(DialogueGUID);
+		const FDlgHistory* History = HistoryMap.Find(DialogueGUID);
 		if (History == nullptr)
 		{
 			return false;
@@ -183,36 +177,14 @@ public:
 		return History->VisitedNodeGUIDs.Contains(NodeGUID);
 	}
 
-	const TMap<FGuid, FDlgHistory>& GetHistoryMaps() const { return GetHistoryMap(); }
-	void SetHistoryMap(const TMap<FGuid, FDlgHistory>& Map) { GetHistoryMap() = Map; }
-
-	//-----------------------------------------------------------------------------
-	// Torbie Begin Change
-	void SetHistoryMapOverride(TMap<FGuid, FDlgHistory>* Map) { HistoryMapOverride = Map; }
-	// Torbie End Change
-	//-----------------------------------------------------------------------------
+	const TMap<FGuid, FDlgHistory>& GetHistoryMaps() const { return HistoryMap; }
+	void SetHistoryMap(const TMap<FGuid, FDlgHistory>& Map) { HistoryMap = Map; }
 
 private:
 	 // Key: Dialogue unique identifier GUID
 	 // Value: set of already visited nodes
 	UPROPERTY()
 	TMap<FGuid, FDlgHistory> HistoryMap;
-
-	//-----------------------------------------------------------------------------
-	// Torbie Begin Change
-	TMap<FGuid, FDlgHistory>* HistoryMapOverride = nullptr;
-	
-	TMap<FGuid, FDlgHistory>& GetHistoryMap()
-	{
-		return HistoryMapOverride ? *HistoryMapOverride : HistoryMap;
-	}
-
-	const TMap<FGuid, FDlgHistory>& GetHistoryMap() const
-	{
-		return HistoryMapOverride ? *HistoryMapOverride : HistoryMap;
-	}
-	// Torbie End Change
-	//-----------------------------------------------------------------------------
 };
 
 template<>
@@ -223,3 +195,85 @@ struct TStructOpsTypeTraits<FDlgHistory> : public TStructOpsTypeTraitsBase2<FDlg
 		WithIdenticalViaEquality = true
 	};
 };
+#else
+
+USTRUCT(BlueprintType)
+struct DLGSYSTEM_API FDlgNodeSavedData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	FGuid ParentNode;
+
+	UPROPERTY(SaveGame)
+	TArray<FGuid> GUIDList;
+
+	FDlgNodeSavedData() = default;
+
+	FDlgNodeSavedData(
+		FGuid InParentNode
+		)
+		: ParentNode(InParentNode)
+	{
+	}
+
+	void Add(const FGuid& NodeGUID);
+};
+
+USTRUCT(BlueprintType)
+struct DLGSYSTEM_API FDlgHistory
+{
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	FGuid ParentDlg;
+
+	UPROPERTY(SaveGame)
+	TArray<FGuid> VisitedNodeGUIDs;
+
+	UPROPERTY(SaveGame)
+	TArray<FDlgNodeSavedData> VisitedNodeDatas;
+
+	FDlgHistory() = default;
+
+	FDlgHistory(
+		FGuid InParentDlg
+		)
+		: ParentDlg(InParentDlg)
+	{
+	}
+
+	void Add(int32 NodeIndex, const FGuid& NodeGUID);
+
+	bool Contains(int32 NodeIndex, const FGuid& NodeGUID) const;
+
+	FDlgNodeSavedData& GetNodeData(const FGuid& NodeGUID);
+};
+
+UCLASS(BlueprintType)
+class DLGSYSTEM_API UDlgMemory : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(SaveGame, Replicated)
+	TArray<FDlgHistory> DialogueHistories;
+
+	void GetLifetimeReplicatedProps(
+		TArray<FLifetimeProperty>& OutLifetimeProps
+		) const override;
+
+	void Reset();
+
+	const FDlgHistory* Find(const FGuid& DialogueGUID) const;
+
+	FDlgHistory& FindOrAddEntry(const FGuid& DialogueGUID);
+
+	UFUNCTION(BlueprintCallable, Category="Dialogue")
+	void SetNodeVisited(const FGuid& DialogueGUID, int32 NodeIndex, const FGuid& NodeGUID);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Dialogue")
+	bool IsNodeVisited(const FGuid& DialogueGUID, int32 NodeIndex, const FGuid& NodeGUID) const;
+};
+
+#endif

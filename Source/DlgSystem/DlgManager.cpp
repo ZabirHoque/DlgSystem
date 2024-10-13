@@ -96,10 +96,19 @@ UDlgContext* UDlgManager::StartDialogueWithDefaultParticipants(UObject* WorldCon
 		return nullptr;
 	}
 
-	return StartDialogueWithContext(TEXT("StartDialogueWithDefaultParticipants"), Dialogue, Participants);
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	UDlgMemory* Memory = nullptr;
+	return StartDialogueWithContext(TEXT("StartDialogueWithDefaultParticipants"), Dialogue, Participants, Memory);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 }
 
-UDlgContext* UDlgManager::StartDialogueWithContext(const FString& ContextString, UDlgDialogue* Dialogue, const TArray<UObject*>& Participants)
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+UDlgContext* UDlgManager::StartDialogueWithContext(const FString& ContextString, UDlgDialogue* Dialogue, const TArray<UObject*>& Participants, UDlgMemory* Memory)
+// Torbie End Change
+//-----------------------------------------------------------------------------
 {
 	const FString ContextMessage = ContextString.IsEmpty()
 		? FString::Printf(TEXT("StartDialogue"))
@@ -111,31 +120,43 @@ UDlgContext* UDlgManager::StartDialogueWithContext(const FString& ContextString,
 		return nullptr;
 	}
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
 	auto* Context = NewObject<UDlgContext>(Participants[0], UDlgContext::StaticClass());
-	if (Context->StartWithContext(ContextMessage, Dialogue, ParticipantBinding))
+	if (Context->StartWithContext(ContextMessage, Dialogue, ParticipantBinding, Memory))
 	{
 		return Context;
 	}
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	return nullptr;
 }
 
-bool UDlgManager::CanStartDialogue(UDlgDialogue* Dialogue, UPARAM(ref)const TArray<UObject*>& Participants)
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+const UDlgNode* UDlgManager::CanStartDialogue(UDlgDialogue* Dialogue, UPARAM(ref)const TArray<UObject*>& Participants, UDlgMemory* Memory)
 {
 	TMap<FName, UObject*> ParticipantBinding;
 	if (!UDlgContext::ConvertArrayOfParticipantsToMap(TEXT("CanStartDialogue"), Dialogue, Participants, ParticipantBinding, false))
 	{
-		return false;
+		return nullptr;
 	}
 
-	return UDlgContext::CanBeStarted(Dialogue, ParticipantBinding);
+	return UDlgContext::CanBeStarted(Dialogue, ParticipantBinding, Memory);
 }
+// Torbie End Change
+//-----------------------------------------------------------------------------
 
 UDlgContext* UDlgManager::ResumeDialogueFromNodeIndex(
 	UDlgDialogue* Dialogue,
 	UPARAM(ref)const TArray<UObject*>& Participants,
 	int32 StartNodeIndex,
-	const TSet<int32>& AlreadyVisitedNodes,
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	const TSet<FGuid>& AlreadyVisitedNodes,
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 	bool bFireEnterEvents
 )
 {
@@ -148,7 +169,11 @@ UDlgContext* UDlgManager::ResumeDialogueFromNodeIndex(
 
 	auto* Context = NewObject<UDlgContext>(Participants[0], UDlgContext::StaticClass());
 	FDlgHistory History;
-	History.VisitedNodeIndices = AlreadyVisitedNodes;
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	History.VisitedNodeGUIDs = AlreadyVisitedNodes.Array();
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 	if (Context->StartWithContextFromNodeIndex(ContextMessage, Dialogue, ParticipantBinding, StartNodeIndex, History, bFireEnterEvents))
 	{
 		return Context;
@@ -174,7 +199,11 @@ UDlgContext* UDlgManager::ResumeDialogueFromNodeGUID(
 
 	auto* Context = NewObject<UDlgContext>(Participants[0], UDlgContext::StaticClass());
 	FDlgHistory History;
-	History.VisitedNodeGUIDs = AlreadyVisitedNodes;
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	History.VisitedNodeGUIDs = AlreadyVisitedNodes.Array();
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 	if (Context->StartWithContextFromNodeGUID(ContextMessage, Dialogue, ParticipantBinding, StartNodeGUID, History, bFireEnterEvents))
 	{
 		return Context;
@@ -183,31 +212,33 @@ UDlgContext* UDlgManager::ResumeDialogueFromNodeGUID(
 	return nullptr;
 }
 
-UDlgContext* UDlgManager::StartMonologue(UDlgDialogue* Dialogue, UObject* Participant)
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+UDlgContext* UDlgManager::StartMonologue(UDlgDialogue* Dialogue, UDlgMemory* Memory, UObject* Participant)
 {
 	TArray<UObject*> Participants;
 	Participants.Add(Participant);
-	return StartDialogueWithContext(TEXT("StartMonologue"), Dialogue, Participants);
+	return StartDialogueWithContext(TEXT("StartMonologue"), Dialogue, Participants, Memory);
 }
 
-UDlgContext* UDlgManager::StartDialogue2(UDlgDialogue* Dialogue, UObject* Participant0, UObject* Participant1)
+UDlgContext* UDlgManager::StartDialogue2(UDlgDialogue* Dialogue, UDlgMemory* Memory, UObject* Participant0, UObject* Participant1)
 {
 	TArray<UObject*> Participants;
 	Participants.Add(Participant0);
 	Participants.Add(Participant1);
-	return StartDialogueWithContext(TEXT("StartDialogue2"), Dialogue, Participants);
+	return StartDialogueWithContext(TEXT("StartDialogue2"), Dialogue, Participants, Memory);
 }
 
-UDlgContext* UDlgManager::StartDialogue3(UDlgDialogue* Dialogue, UObject* Participant0, UObject* Participant1, UObject* Participant2)
+UDlgContext* UDlgManager::StartDialogue3(UDlgDialogue* Dialogue, UDlgMemory* Memory, UObject* Participant0, UObject* Participant1, UObject* Participant2)
 {
 	TArray<UObject*> Participants;
 	Participants.Add(Participant0);
 	Participants.Add(Participant1);
 	Participants.Add(Participant2);
-	return StartDialogueWithContext(TEXT("StartDialogue3"), Dialogue, Participants);
+	return StartDialogueWithContext(TEXT("StartDialogue3"), Dialogue, Participants, Memory);
 }
 
-UDlgContext* UDlgManager::StartDialogue4(UDlgDialogue* Dialogue, UObject* Participant0, UObject* Participant1, UObject* Participant2, UObject* Participant3)
+UDlgContext* UDlgManager::StartDialogue4(UDlgDialogue* Dialogue, UDlgMemory* Memory, UObject* Participant0, UObject* Participant1, UObject* Participant2, UObject* Participant3)
 {
 	TArray<UObject*> Participants;
 	Participants.Add(Participant0);
@@ -215,8 +246,10 @@ UDlgContext* UDlgManager::StartDialogue4(UDlgDialogue* Dialogue, UObject* Partic
 	Participants.Add(Participant2);
 	Participants.Add(Participant3);
 
-	return StartDialogueWithContext(TEXT("StartDialogue4"), Dialogue, Participants);
+	return StartDialogueWithContext(TEXT("StartDialogue4"), Dialogue, Participants, Memory);
 }
+// Torbie End Change
+//-----------------------------------------------------------------------------
 
 int32 UDlgManager::LoadAllDialoguesIntoMemory(bool bAsync)
 {
@@ -391,29 +424,33 @@ TMap<FGuid, UDlgDialogue*> UDlgManager::GetAllDialoguesGUIDsMap()
 	return DialoguesMap;
 }
 
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
 const TMap<FGuid, FDlgHistory>& UDlgManager::GetDialogueHistory()
 {
+#if 0
 	return FDlgMemory::Get().GetHistoryMaps();
+#else
+	const TMap<FGuid, FDlgHistory>* __bad_ptr = nullptr;
+	return *__bad_ptr;
+#endif
 }
 
 void UDlgManager::SetDialogueHistory(const TMap<FGuid, FDlgHistory>& DlgHistory)
 {
+#if 0
 	FDlgMemory::Get().SetHistoryMap(DlgHistory);
+#endif
 }
-
-//-----------------------------------------------------------------------------
-// Torbie Begin Change
-void UDlgManager::SetDialogueHistoryOverride(TMap<FGuid, FDlgHistory>* DlgHistory)
-{
-	FDlgMemory::Get().SetHistoryMapOverride(DlgHistory);
-}
-// Torbie End Change
-//-----------------------------------------------------------------------------
 
 void UDlgManager::ClearDialogueHistory()
 {
-	FDlgMemory::Get().Empty();
+#if 0
+  FDlgMemory::Get().Empty();
+#endif
 }
+// Torbie End Change
+//-----------------------------------------------------------------------------
 
 bool UDlgManager::DoesObjectImplementDialogueParticipantInterface(const UObject* Object)
 {

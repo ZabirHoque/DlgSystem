@@ -585,7 +585,9 @@ UDlgContext* UDlgContext::CreateCopy() const
 	Context->bDialogueEnded = bDialogueEnded;
 	//-----------------------------------------------------------------------------
 	// Torbie Begin Change
-	Context->OriginDialogue = OriginDialogue;
+	Context->OriginDialogue    = OriginDialogue;
+	Context->OriginStartNode   = OriginStartNode;
+	Context->bIsSimulatedStart = bIsSimulatedStart;
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 
@@ -596,7 +598,10 @@ void UDlgContext::SetNodeVisited(int32 NodeIndex, const FGuid& NodeGUID)
 {
 	//-----------------------------------------------------------------------------
 	// Torbie Begin Change
-	FDlgMemory::Get().SetNodeVisited(GetVisitingGuid(), NodeIndex, NodeGUID);
+	if (Memory)
+	{
+		Memory->SetNodeVisited(GetVisitingGuid(), NodeIndex, NodeGUID);
+	}
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 	History.Add(NodeIndex, NodeGUID);
@@ -611,7 +616,7 @@ bool UDlgContext::IsNodeVisited(int32 NodeIndex, const FGuid& NodeGUID, bool bLo
 
 	//-----------------------------------------------------------------------------
 	// Torbie Begin Change
-	return FDlgMemory::Get().IsNodeVisited(GetVisitingGuid(), NodeIndex, NodeGUID);
+	return Memory ? Memory->IsNodeVisited(GetVisitingGuid(), NodeIndex, NodeGUID) : false;
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 }
@@ -620,7 +625,7 @@ FDlgNodeSavedData& UDlgContext::GetNodeSavedData(const FGuid& NodeGUID)
 {
 	//-----------------------------------------------------------------------------
 	// Torbie Begin Change
-	return FDlgMemory::Get().FindOrAddEntry(GetVisitingGuid()).GetNodeData(NodeGUID);
+	return Memory ? Memory->FindOrAddEntry(GetVisitingGuid()).GetNodeData(NodeGUID) : NodeSavedDataFallback;
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 }
@@ -690,11 +695,19 @@ bool UDlgContext::IsNodeEnterable(int32 NodeIndex, TSet<const UDlgNode*> Already
 	return false;
 }
 
-bool UDlgContext::CanBeStarted(UDlgDialogue* InDialogue, const TMap<FName, UObject*>& InParticipants)
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+const UDlgNode* UDlgContext::CanBeStarted(UDlgDialogue* InDialogue, const TMap<FName, UObject*>& InParticipants, UDlgMemory* InMemory)
+// Torbie End Change
+//-----------------------------------------------------------------------------
 {
 	if (!ValidateParticipantsMapForDialogue(TEXT("CanBeStarted"), InDialogue, InParticipants, false))
 	{
-		return false;
+		//-----------------------------------------------------------------------------
+		// Torbie Begin Change
+		return nullptr;
+		// Torbie End Change
+		//-----------------------------------------------------------------------------
 	}
 
 	// Get first participant
@@ -714,6 +727,21 @@ bool UDlgContext::CanBeStarted(UDlgDialogue* InDialogue, const TMap<FName, UObje
 	Context->Dialogue = InDialogue;
 	Context->SetParticipants(InParticipants);
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+#if 1
+	Context->bIsSimulatedStart = true;
+
+    UDlgMemory* Memory = nullptr;
+	if (InMemory)
+	{
+	    Memory = NewObject<UDlgMemory>();
+		Memory->DialogueHistories = InMemory->DialogueHistories;
+	}
+
+	return Context->StartWithContext(TEXT("CanBeStarted"), InDialogue, InParticipants, Memory) ?
+		Context->OriginStartNode : nullptr;
+#else
 	// Evaluate edges/children of the start node
 	for (const UDlgNode* StartNode : InDialogue->GetStartNodes())
 	{
@@ -732,9 +760,16 @@ bool UDlgContext::CanBeStarted(UDlgDialogue* InDialogue, const TMap<FName, UObje
 	}
 
 	return false;
+#endif
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 }
 
-bool UDlgContext::StartWithContext(const FString& ContextString, UDlgDialogue* InDialogue, const TMap<FName, UObject*>& InParticipants)
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+bool UDlgContext::StartWithContext(const FString& ContextString, UDlgDialogue* InDialogue, const TMap<FName, UObject*>& InParticipants, UDlgMemory* InMemory)
+// Torbie End Change
+//-----------------------------------------------------------------------------
 {
 	const FString ContextMessage = ContextString.IsEmpty()
 		? TEXT("Start")
@@ -748,6 +783,8 @@ bool UDlgContext::StartWithContext(const FString& ContextString, UDlgDialogue* I
 	}
 
 	ActiveNodeIndex = 0;
+
+	Memory = InMemory;
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 
@@ -768,6 +805,15 @@ bool UDlgContext::StartWithContext(const FString& ContextString, UDlgDialogue* I
 			{
 				if (EnterNode(ChildLink.TargetIndex, {}))
 				{
+					//-----------------------------------------------------------------------------
+					// Torbie Begin Change
+                    if (!OriginStartNode && OriginDialogue == InDialogue)
+					{
+						OriginStartNode = StartNode;
+					}
+					// Torbie End Change
+					//-----------------------------------------------------------------------------
+
 					return true;
 				}
 			}
@@ -837,6 +883,15 @@ bool UDlgContext::StartWithContextFromNode(
 		));
 		return false;
 	}
+
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	if (!OriginStartNode)
+	{
+		OriginStartNode = Node;
+	}
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 
 	if (bFireEnterEvents)
 	{
