@@ -401,6 +401,15 @@ void UDlgManager::SetDialogueHistory(const TMap<FGuid, FDlgHistory>& DlgHistory)
 	FDlgMemory::Get().SetHistoryMap(DlgHistory);
 }
 
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+void UDlgManager::SetDialogueHistoryOverride(TMap<FGuid, FDlgHistory>* DlgHistory)
+{
+	FDlgMemory::Get().SetHistoryMapOverride(DlgHistory);
+}
+// Torbie End Change
+//-----------------------------------------------------------------------------
+
 void UDlgManager::ClearDialogueHistory()
 {
 	FDlgMemory::Get().Empty();

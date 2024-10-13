@@ -189,6 +189,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|Memory")
 	static void SetDialogueHistory(const TMap<FGuid, FDlgHistory>& DlgHistory);
 
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	// Allow directing dialog history to instance of history.
+	static void SetDialogueHistoryOverride(TMap<FGuid, FDlgHistory>* DlgHistory);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	// Empties the FDlgMemory Dialogue history.
 	UFUNCTION(BlueprintCallable, Category = "Dialogue|Memory")
 	static void ClearDialogueHistory();

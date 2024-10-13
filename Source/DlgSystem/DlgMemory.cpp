@@ -4,10 +4,17 @@
 
 void FDlgHistory::Add(int32 NodeIndex, const FGuid& NodeGUID)
 {
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+#if 0
 	if (NodeIndex >= 0)
 	{
 		VisitedNodeIndices.Add(NodeIndex);
 	}
+#endif
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
+
 	if (NodeGUID.IsValid())
 	{
 		VisitedNodeGUIDs.Add(NodeGUID);
@@ -28,8 +35,24 @@ bool FDlgHistory::Contains(int32 NodeIndex, const FGuid& NodeGUID) const
 
 bool FDlgHistory::operator==(const FDlgHistory& Other) const
 {
-	return FDlgHelper::IsSetEqual(VisitedNodeIndices, Other.VisitedNodeIndices)
-		&& FDlgHelper::IsSetEqual(VisitedNodeGUIDs, Other.VisitedNodeGUIDs);
+	//-----------------------------------------------------------------------------
+	// Torbie Begin Change
+	bool bCanUseGUID       = CanUseGUIDForSearch();
+	bool bCanUseGUID_Other = Other.CanUseGUIDForSearch();
+
+	if (bCanUseGUID != bCanUseGUID_Other)
+	{
+		return false;
+	}
+
+	if (bCanUseGUID)
+	{
+		return FDlgHelper::IsSetEqual(VisitedNodeGUIDs, Other.VisitedNodeGUIDs);
+	}
+
+	return FDlgHelper::IsSetEqual(VisitedNodeIndices, Other.VisitedNodeIndices);
+	// Torbie End Change
+	//-----------------------------------------------------------------------------
 }
 
 FDlgNodeSavedData& FDlgHistory::GetNodeData(const FGuid& NodeGUID)
