@@ -83,6 +83,12 @@ protected:
 	// Torbie Begin Change
 	/** Gets the tooltip for the text overlay. */
 	FText GetTextOverlayTooltipText() const;
+
+    FText GetSelectionWeightOverlayText() const;
+
+    FText GetSelectionWeightOverlayTooltipText() const;
+
+    EVisibility GetSelectionWeightOverlayWidgetVisibility() const;
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 
@@ -117,6 +123,9 @@ protected:
 
 	/** The widget we use to display if the edge has any text */
 	TSharedPtr<SWidget> TextOverlayWidget;
-	// Torbie End Change
+
+    /** The widget we use to display the weight of the edge for random selector parents */
+    TSharedPtr<SWidget> SelectionWeightOverlayWidget;
+    // Torbie End Change
 	//-----------------------------------------------------------------------------
 };

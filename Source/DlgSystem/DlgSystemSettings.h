@@ -266,6 +266,12 @@ public:
 	// Torbie Begin Change
 	UPROPERTY(Category = "Dialogue", Config, EditAnywhere, meta = (ConfigRestartRequired = true))
 	bool bExposeAssetCreation = true;
+
+    UPROPERTY(Category = "Dialogue", Config, EditAnywhere)
+    bool bIncludeDefaultParticipant = true;
+
+    UPROPERTY(Category = "Dialogue", Config, EditAnywhere, meta=(EditCondition="bIncludeDefaultParticipant"))
+    FName DefaultParticipantName;
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 

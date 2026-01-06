@@ -78,7 +78,7 @@ FReply SDlgGraphNode::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, co
 //-----------------------------------------------------------------------------
 // Torbie Begin Change
 void SDlgGraphNode::MoveTo(
-	const FVector2D& NewPosition,
+	const FVector2f& NewPosition,
 	FNodeSet& NodeFilter,
 	bool bMarkDirty
 	)

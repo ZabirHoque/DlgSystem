@@ -659,7 +659,6 @@ protected:
 
 	UPROPERTY()
 	const UDlgNode* OriginStartNode = nullptr;
-
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 

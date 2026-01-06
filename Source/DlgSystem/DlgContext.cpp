@@ -1,6 +1,11 @@
 // Copyright Csaba Molnar, Daniel Butum. All Rights Reserved.
 #include "DlgContext.h"
 
+//-----------------------------------------------------------------------------
+// Torbie Begin Change
+#include "Algo/Partition.h"
+// Torbie End Change
+//-----------------------------------------------------------------------------
 #include "Net/UnrealNetwork.h"
 #include "Engine/Texture2D.h"
 #include "Engine/Blueprint.h"
@@ -39,18 +44,49 @@ void UDlgContext::SerializeParticipants()
 	{
 		SerializedParticipants.Add(KeyValue.Value);
 	}
+
+    //-----------------------------------------------------------------------------
+    // Torbie Begin Change
+    auto* dlgSettings = GetDefault<UDlgSystemSettings>();
+    if (dlgSettings->bIncludeDefaultParticipant && Participants.Contains(dlgSettings->DefaultParticipantName))
+    {
+        Algo::Partition(
+            SerializedParticipants,
+            [defaultParticipant = Participants[dlgSettings->DefaultParticipantName]](UObject* participant)
+            {
+                return participant == defaultParticipant;
+            });
+    }
+    // Torbie End Change
+    //-----------------------------------------------------------------------------
 }
 
 void UDlgContext::OnRep_SerializedParticipants()
 {
-	Participants.Empty(SerializedParticipants.Num());
-	for (UObject* Participant : SerializedParticipants)
-	{
-		if (IsValid(Participant))
-		{
-			Participants.Add(IDlgDialogueParticipant::Execute_GetParticipantName(Participant), Participant);
-		}
-	}
+    //-----------------------------------------------------------------------------
+    // Torbie Begin Change
+    auto* dlgSettings = GetDefault<UDlgSystemSettings>();
+
+    bool bIsDefaultParticipantAdded = !dlgSettings->bIncludeDefaultParticipant;
+
+    Participants.Empty(SerializedParticipants.Num());
+    for (UObject* Participant : SerializedParticipants)
+    {
+        if (!IsValid(Participant))
+        {
+            continue;
+        }
+
+        if (!bIsDefaultParticipantAdded && IDlgDialogueParticipant::Execute_IsDefaultParticipant(Participant))
+        {
+            Participants.Add(dlgSettings->DefaultParticipantName, Participant);
+            bIsDefaultParticipantAdded = true;
+        }
+
+        Participants.Add(IDlgDialogueParticipant::Execute_GetParticipantName(Participant), Participant);
+    }
+    // Torbie End Change
+    //-----------------------------------------------------------------------------
 }
 
 //-----------------------------------------------------------------------------
@@ -822,7 +858,7 @@ bool UDlgContext::StartWithContext(const FString& ContextString, UDlgDialogue* I
 	}
 
 	// Evaluate edges/children of the start node
-	
+
 	for (const UDlgNode* StartNode : Dialogue->GetStartNodes())
 	{
 		for (const FDlgEdge& ChildLink : StartNode->GetNodeChildren())
@@ -1104,32 +1140,45 @@ bool UDlgContext::ValidateParticipantsMapForDialogue(
 		const FName ParticipantName = KeyValue.Key;
 		const UObject* Participant = KeyValue.Value;
 
+        //-----------------------------------------------------------------------------
+        // Torbie Begin Change
+        auto* dlgSettings = GetDefault<UDlgSystemSettings>();
+        const bool bIsDefaultParticipant = dlgSettings->bIncludeDefaultParticipant && dlgSettings->DefaultParticipantName == ParticipantName;
+        // Torbie End Change
+        //-----------------------------------------------------------------------------
+
 		// We must check this otherwise we can't get the name
 		if (!ValidateParticipantForDialogue(ContextMessage, Dialogue, Participant, bLog))
 		{
 			return false;
 		}
 
-		// Check the Map Key matches the Participant Name
-		// This should only happen if you constructed the map incorrectly by mistake
-		// If you used ConvertArrayOfParticipantsToMap this should have NOT happened
-		{
-			const FName ObjectParticipantName = IDlgDialogueParticipant::Execute_GetParticipantName(Participant);
-			if (ParticipantName != ObjectParticipantName)
-			{
-				if (bLog)
-				{
-					FDlgLogger::Get().Errorf(
-						TEXT("%s - The Map has a KEY Participant Name = `%s` DIFFERENT to the VALUE of the Participant Path = `%s` with the Name = `%s` (KEY Participant Name != VALUE Participant Name)"),
-						*ContextMessage, *ParticipantName.ToString(), *Participant->GetPathName(), *ObjectParticipantName.ToString()
-					);
-				}
-				return false;
-			}
-		}
+        //-----------------------------------------------------------------------------
+        // Torbie Begin Change
+        // Check the Map Key matches the Participant Name
+        // This should only happen if you constructed the map incorrectly by mistake
+        // If you used ConvertArrayOfParticipantsToMap this should have NOT happened
+        {
+            const FName ObjectParticipantName = IDlgDialogueParticipant::Execute_GetParticipantName(Participant);
+            if (ParticipantName != ObjectParticipantName && !bIsDefaultParticipant)
+            {
+                if (bLog)
+                {
+                    FDlgLogger::Get().Errorf(
+                        TEXT("%s - The Map has a KEY Participant Name = `%s` DIFFERENT to the VALUE of the Participant Path = `%s` with the Name = `%s` (KEY Participant Name != VALUE Participant Name)"),
+                        *ContextMessage, *ParticipantName.ToString(), *Participant->GetPathName(), *ObjectParticipantName.ToString()
+                        );
+                }
+                return false;
+            }
+        }
+        // Torbie End Change
+        //-----------------------------------------------------------------------------
 
+		//-----------------------------------------------------------------------------
+		// Torbie Begin Change
 		// We found one participant from our set
-		if (ParticipantsRequiredSet.Contains(ParticipantName))
+		if (bIsDefaultParticipant || ParticipantsRequiredSet.Contains(ParticipantName))
 		{
 			ParticipantsRequiredSet.Remove(ParticipantName);
 		}
@@ -1138,18 +1187,16 @@ bool UDlgContext::ValidateParticipantsMapForDialogue(
 			// Participant does note exist, just warn about it, we are relaxed about this
 			if (bLog)
 			{
-				//-----------------------------------------------------------------------------
-				// Torbie Begin Change
-#if 0
-				FDlgLogger::Get().Warningf(
-					TEXT("%s - Participant Path = `%s` with Participant Name = `%s` is NOT referenced (DOES) not exist inside the Dialogue. It is going to be IGNORED.\nContext:\n\tDialogue = `%s`"),
-					*ContextMessage, *Participant->GetPathName(), *ParticipantName.ToString(), *Dialogue->GetPathName()
-				);
-#endif
-				// Torbie End Change
-				//-----------------------------------------------------------------------------
+                #if 0
+				    FDlgLogger::Get().Warningf(
+					    TEXT("%s - Participant Path = `%s` with Participant Name = `%s` is NOT referenced (DOES) not exist inside the Dialogue. It is going to be IGNORED.\nContext:\n\tDialogue = `%s`"),
+					    *ContextMessage, *Participant->GetPathName(), *ParticipantName.ToString(), *Dialogue->GetPathName()
+				    );
+                #endif
 			}
 		}
+		// Torbie End Change
+		//-----------------------------------------------------------------------------
 	}
 
 	// Some participants are missing
@@ -1229,6 +1276,25 @@ bool UDlgContext::ConvertArrayOfParticipantsToMap(
 
 		OutParticipantsMap.Add(ParticipantName, Participant);
 	}
+
+    //-----------------------------------------------------------------------------
+    // Torbie Begin Change
+    auto* dlgSystemSettings = GetDefault<UDlgSystemSettings>();
+    if (dlgSystemSettings->bIncludeDefaultParticipant)
+    {
+        for (int32 Index = 0; Index < ParticipantsArray.Num(); Index++)
+        {
+            UObject* Participant = ParticipantsArray[Index];
+
+            if (IDlgDialogueParticipant::Execute_IsDefaultParticipant(Participant))
+            {
+                OutParticipantsMap.Add(dlgSystemSettings->DefaultParticipantName, Participant);
+                break;
+            }
+        }
+    }
+    // Torbie End Change
+    //-----------------------------------------------------------------------------
 
 	return true;
 }

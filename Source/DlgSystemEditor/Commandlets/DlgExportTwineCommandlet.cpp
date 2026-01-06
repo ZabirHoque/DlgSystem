@@ -327,7 +327,13 @@ FString UDlgExportTwineCommandlet::CreateTwinePassageDataFromNode(const UDlgDial
 		//CurrentNodesAreas.Add(FIntRect(Position + Padding, Position + Size + Padding));
 
 		const UDlgNode_Speech& NodeSpeech = DialogueGraphNode->GetDialogueNode<UDlgNode_Speech>();
-		NodeContent += EscapeHtml(NodeSpeech.GetNodeUnformattedText().ToString());
+		NodeContent += EscapeHtml(
+			NodeSpeech.GetNodeUnformattedText().ToString()
+				.Replace(TEXT("<"), TEXT("("))
+				.Replace(TEXT(">"), TEXT(")"))
+				.Replace(TEXT("["), TEXT("("))
+				.Replace(TEXT("]"), TEXT(")"))
+			);
 		NodeContent += TEXT("\n\n\n") + CreateTwinePassageDataLinksFromEdges(Dialogue, Node.GetNodeChildren(), true);
 		return CreateTwinePassageData(NodeIndex, NodeName, Tags, Position, Size, NodeContent);
 	}
@@ -338,7 +344,13 @@ FString UDlgExportTwineCommandlet::CreateTwinePassageDataFromNode(const UDlgDial
 		//CurrentNodesAreas.Add(FIntRect(Position + Padding, Position + Size + Padding));
 
 		const UDlgNode_Speech& NodeSpeech = DialogueGraphNode->GetDialogueNode<UDlgNode_Speech>();
-		NodeContent += EscapeHtml(NodeSpeech.GetNodeUnformattedText().ToString());
+		NodeContent += EscapeHtml(
+			NodeSpeech.GetNodeUnformattedText().ToString()
+				.Replace(TEXT("<"), TEXT("("))
+				.Replace(TEXT(">"), TEXT(")"))
+				.Replace(TEXT("["), TEXT("("))
+				.Replace(TEXT("]"), TEXT(")"))
+			);
 		NodeContent += TEXT("\n\n\n") + CreateTwinePassageDataLinksFromEdges(Dialogue, Node.GetNodeChildren());
 		return CreateTwinePassageData(NodeIndex, NodeName, Tags, Position, Size, NodeContent);
 	}
@@ -408,7 +420,7 @@ FString UDlgExportTwineCommandlet::CreateTwinePassageDataFromNode(const UDlgDial
 
 FString UDlgExportTwineCommandlet::GetNodeNameFromNode(const UDlgNode& Node, int32 NodeIndex, bool bIsRootNode)
 {
-	return FString::Printf(TEXT("%d. %s"), NodeIndex, bIsRootNode ? TEXT("START") : *Node.GetNodeParticipantName().ToString());
+	return FString::Printf(TEXT("%d %s"), NodeIndex, bIsRootNode ? TEXT("START") : *Node.GetNodeParticipantName().ToString());
 }
 
 FString UDlgExportTwineCommandlet::CreateTwinePassageDataLinksFromEdges(const UDlgDialogue& Dialogue, const TArray<FDlgEdge>& Edges, bool bNoTextOnEdges)
@@ -430,12 +442,20 @@ FString UDlgExportTwineCommandlet::CreateTwinePassageDataLinksFromEdges(const UD
 		FString EdgeText;
 		if (bNoTextOnEdges || Edge.GetUnformattedText().IsEmpty())
 		{
-			EdgeText = FString::Printf(TEXT("~ignore~ To Node %d"), Edge.TargetIndex);
+			EdgeText = FString::Printf(TEXT("(Next|%d)"), Edge.TargetIndex);
 		}
 		else
 		{
-			EdgeText = EscapeHtml(Edge.GetUnformattedText().ToString());
+			EdgeText = Edge.GetUnformattedText().ToString();
+			EdgeText = EdgeText
+				.Replace(TEXT("<"), TEXT("("))
+				.Replace(TEXT(">"), TEXT(")"))
+				.Replace(TEXT("["), TEXT("("))
+				.Replace(TEXT("]"), TEXT(")"));
 		}
+
+	    EdgeText = EscapeHtml(EdgeText);
+
 		Links += FString::Printf(TEXT("[[%s|%s]]\n"), *EdgeText, *GetNodeNameFromNode(*Nodes[Edge.TargetIndex], Edge.TargetIndex, false));
 	}
 	Links.RemoveFromEnd(TEXT("\n"));

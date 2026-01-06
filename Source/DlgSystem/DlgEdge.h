@@ -120,6 +120,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "DialogueEdge", Meta = (ClampMin = -1))
 	int32 TargetIndex = INDEX_NONE;
 
+    //-----------------------------------------------------------------------------
+    // Torbie Begin Change
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DialogueEdge", Meta = (ClampMin = 0))
+    int32 SelectionWeight = 1;
+    // Torbie End Change
+    //-----------------------------------------------------------------------------
+
 	// Required but not sufficient conditions - target node's enter conditions are checked too
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DialogueEdge")
 	TArray<FDlgCondition> Conditions;

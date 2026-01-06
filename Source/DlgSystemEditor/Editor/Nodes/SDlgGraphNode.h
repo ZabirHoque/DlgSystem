@@ -53,7 +53,7 @@ public:
 
 	//-----------------------------------------------------------------------------
 	// Torbie Begin Change
-	void MoveTo(const FVector2D& NewPosition, FNodeSet& NodeFilter, bool bMarkDirty) override;
+	void MoveTo(const FVector2f& NewPosition, FNodeSet& NodeFilter, bool bMarkDirty) override;
 
 	void EndUserInteraction() const override;
 	// Torbie End Change
