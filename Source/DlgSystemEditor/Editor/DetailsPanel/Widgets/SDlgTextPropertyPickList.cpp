@@ -3,8 +3,9 @@
 
 #include "PropertyHandle.h"
 #include "Widgets/Input/SSearchBox.h"
-#include "Widgets/Views/STileView.h"
 #include "Framework/Application/SlateApplication.h"
+#include "DetailWidgetRow.h"
+#include "IDocumentation.h"
 #include "Layout/WidgetPath.h"
 
 #include "DlgSystem/NYEngineVersionHelpers.h"
@@ -274,10 +275,10 @@ TSharedRef<SWidget> SDlgTextPropertyPickList::GetListViewWidget()
 		.Padding(0)
 		.BorderImage(FNYAppStyle::GetBrush("NoBorder"));
 
-	ListViewWidget = SNew(STileView<TextListItem>)
+	ListViewWidget = SNew(SListView<TextListItem>)
 		.SelectionMode(ESelectionMode::Single)
 		.ListItemsSource(&Suggestions)
-		.OnGenerateTile(this, &Self::HandleListGenerateRow)
+		.OnGenerateRow(this, &Self::HandleListGenerateRow)
 		.OnSelectionChanged(this, &Self::HandleListSelectionChanged)
 		.ItemHeight(20);
 

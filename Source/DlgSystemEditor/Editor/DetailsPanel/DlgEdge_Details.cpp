@@ -59,7 +59,7 @@ void FDlgEdge_Details::CustomizeChildren(TSharedRef<IPropertyHandle> InStructPro
 	IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
 	// TargetIndex
-	StructBuilder.AddProperty(StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDlgEdge, TargetIndex)).ToSharedRef());
+    StructBuilder.AddProperty(StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDlgEdge, TargetIndex)).ToSharedRef());
 
 	// Conditions
 	StructBuilder.AddProperty(StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDlgEdge, Conditions)).ToSharedRef());
@@ -103,6 +103,22 @@ void FDlgEdge_Details::CustomizeChildren(TSharedRef<IPropertyHandle> InStructPro
 		GET_MEMBER_NAME_CHECKED(FDlgEdge, bIncludeInAllOptionListIfUnsatisfied)).ToSharedRef()
 	);
 	BoolPropertyRow.Visibility(CREATE_VISIBILITY_CALLBACK(&Self::GetTextVisibility));
+
+    //-----------------------------------------------------------------------------
+    // Torbie Begin Change
+    // SelectionWeight
+    if (UDialogueGraphNode* DialogueGraphNode = FDlgDetailsPanelUtils::GetClosestGraphNodeFromPropertyHandle(StructPropertyHandle.ToSharedRef()))
+    {
+        if (auto* DlgSelectorNode = Cast<UDlgNode_Selector>(DialogueGraphNode->GetMutableDialogueNode()))
+        {
+            if (DlgSelectorNode->GetSelectorType() == EDlgNodeSelectorType::Random)
+            {
+                StructBuilder.AddProperty(StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDlgEdge, SelectionWeight)).ToSharedRef());
+            }
+        }
+    }
+    // Torbie End Change
+    //-----------------------------------------------------------------------------
 
 	// Node Data that can be anything set by the user
 	StructBuilder.AddProperty(StructPropertyHandle->GetChildHandle(FDlgEdge::GetMemberNameEdgeData()).ToSharedRef())

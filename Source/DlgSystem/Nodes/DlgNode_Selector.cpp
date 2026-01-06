@@ -1,6 +1,7 @@
 // Copyright Csaba Molnar, Daniel Butum. All Rights Reserved.
 #include "DlgNode_Selector.h"
 
+#include "Algo/SelectRandomWeighted.h"
 #include "DlgSystem/DlgContext.h"
 #include "DlgSystem/Logging/DlgLogger.h"
 
@@ -93,13 +94,22 @@ bool UDlgNode_Selector::HandleNodeEnter(UDlgContext& Context, TSet<const UDlgNod
 
 int32 UDlgNode_Selector::GetRandomChildNodeIndex(UDlgContext& Context)
 {
+    //-----------------------------------------------------------------------------
+    // Torbie Begin Change
+    struct FWeightedCandidate
+    {
+        int32 EdgeIdx = INDEX_NONE;
+
+        int32 EdgeWeight = 1;
+    };
+
 	FDlgNodeSavedData& SavedData = Context.GetNodeSavedData(NodeGUID);
 
 	// The list of all valid children (ones with satisfied condition)
 	TArray<int32> Candidates;
 
 	// List of possible candidates if we want to avoid repetition based on the booleans
-	TArray<int32> CandidatesLimited;
+	TArray<FWeightedCandidate> CandidatesLimited;
 
 	for (int32 EdgeIndex = 0; EdgeIndex < Children.Num(); ++EdgeIndex)
 	{
@@ -108,9 +118,9 @@ int32 UDlgNode_Selector::GetRandomChildNodeIndex(UDlgContext& Context)
 			Candidates.Add(EdgeIndex);
 
 			const FGuid ChildNodeGUID = Context.GetNodeGUIDForIndex(Children[EdgeIndex].TargetIndex);
-			if (!SavedData.GUIDList.Contains(ChildNodeGUID))
+			if (!SavedData.GUIDList.Contains(ChildNodeGUID) && Children.IsValidIndex(EdgeIndex))
 			{
-				CandidatesLimited.Add(EdgeIndex);
+				CandidatesLimited.Add({EdgeIndex, Children[EdgeIndex].SelectionWeight});
 			}
 		}
 	}
@@ -144,9 +154,21 @@ int32 UDlgNode_Selector::GetRandomChildNodeIndex(UDlgContext& Context)
 	}
 
 	// Select Random
+
+#if 0
 	const int32 SelectedIndex = FMath::RandHelper(CandidatesLimited.Num());
 	const int32 TargetNodeIndex = Children[CandidatesLimited[SelectedIndex]].TargetIndex;
 	const FGuid TargetNodeGUID = Context.GetNodeGUIDForIndex(TargetNodeIndex);
+#else
+    auto* foundCandidate = Algo::SelectRandomWeightedBy(CandidatesLimited, &FWeightedCandidate::EdgeWeight);
+    if (!foundCandidate || !Children.IsValidIndex(foundCandidate->EdgeIdx))
+    {
+		return INDEX_NONE;
+	}
+
+	const int32 TargetNodeIndex = Children[foundCandidate->EdgeIdx].TargetIndex;
+	const FGuid TargetNodeGUID = Context.GetNodeGUIDForIndex(TargetNodeIndex);
+#endif
 
 	// if we cycle through everything the list of picked nodes is needed
 	if (bCycleThroughSatisfiedOptionsWithoutRepetition)
@@ -161,4 +183,6 @@ int32 UDlgNode_Selector::GetRandomChildNodeIndex(UDlgContext& Context)
 	}
 
 	return TargetNodeIndex;
+    // Torbie End Change
+    //-----------------------------------------------------------------------------
 }

@@ -78,7 +78,7 @@ FReply SDlgGraphNode::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, co
 //-----------------------------------------------------------------------------
 // Torbie Begin Change
 void SDlgGraphNode::MoveTo(
-	const FVector2D& NewPosition,
+	const FVector2f& NewPosition,
 	FNodeSet& NodeFilter,
 	bool bMarkDirty
 	)
@@ -110,7 +110,7 @@ void SDlgGraphNode::EndUserInteraction(
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Begin SNodePanel::SNode Interface
-TArray<FOverlayWidgetInfo> SDlgGraphNode::GetOverlayWidgets(bool bSelected, const FNYVector2f& WidgetSize) const
+TArray<FOverlayWidgetInfo> SDlgGraphNode::GetOverlayWidgets(bool bSelected, const FVector2D& WidgetSize) const
 {
 	check(IndexOverlayWidget.IsValid());
 	check(ConditionOverlayWidget.IsValid());
@@ -120,14 +120,14 @@ TArray<FOverlayWidgetInfo> SDlgGraphNode::GetOverlayWidgets(bool bSelected, cons
 
 	TArray<FOverlayWidgetInfo> Widgets;
 	static constexpr float DistanceBetweenWidgetsY = 1.5f;
-	FNYVector2f OriginRightSide(0.0f, 0.0f);
-	FNYVector2f OriginLeftSide(0.0f, 0.0f);
+	FVector2D OriginRightSide(0.0f, 0.0f);
+	FVector2D OriginLeftSide(0.0f, 0.0f);
 
 	// Add Index overlay
 	{
 		// Position on the right of the node
 		FOverlayWidgetInfo Overlay(IndexOverlayWidget);
-		Overlay.OverlayOffset = FNYVector2f(WidgetSize.X - IndexOverlayWidget->GetDesiredSize().X / 2.0f, OriginRightSide.Y);
+		Overlay.OverlayOffset = FVector2D(WidgetSize.X - IndexOverlayWidget->GetDesiredSize().X / 2.0f, OriginRightSide.Y);
 		Widgets.Add(Overlay);
 		OriginRightSide.Y += IndexOverlayWidget->GetDesiredSize().Y + DistanceBetweenWidgetsY;
 	}
@@ -137,7 +137,7 @@ TArray<FOverlayWidgetInfo> SDlgGraphNode::GetOverlayWidgets(bool bSelected, cons
 	{
 		// Position on the right of the node
 		FOverlayWidgetInfo Overlay(VoiceOverlayWidget);
-		Overlay.OverlayOffset = FNYVector2f(WidgetSize.X - VoiceOverlayWidget->GetDesiredSize().X / 3.0f, OriginRightSide.Y);
+		Overlay.OverlayOffset = FVector2D(WidgetSize.X - VoiceOverlayWidget->GetDesiredSize().X / 3.0f, OriginRightSide.Y);
 		Widgets.Add(Overlay);
 		OriginRightSide.Y += VoiceOverlayWidget->GetDesiredSize().Y + DistanceBetweenWidgetsY;
 	}
@@ -147,7 +147,7 @@ TArray<FOverlayWidgetInfo> SDlgGraphNode::GetOverlayWidgets(bool bSelected, cons
 	{
 		// Position on the right of the node
 		FOverlayWidgetInfo Overlay(GenericOverlayWidget);
-		Overlay.OverlayOffset = FNYVector2f(WidgetSize.X - GenericOverlayWidget->GetDesiredSize().X / 3.0f, OriginRightSide.Y);
+		Overlay.OverlayOffset = FVector2D(WidgetSize.X - GenericOverlayWidget->GetDesiredSize().X / 3.0f, OriginRightSide.Y);
 		Widgets.Add(Overlay);
 		OriginRightSide.Y += GenericOverlayWidget->GetDesiredSize().Y + DistanceBetweenWidgetsY;
 	}
@@ -157,7 +157,7 @@ TArray<FOverlayWidgetInfo> SDlgGraphNode::GetOverlayWidgets(bool bSelected, cons
 	{
 		// Position on the left of the node
 		FOverlayWidgetInfo Overlay(ConditionOverlayWidget);
-		Overlay.OverlayOffset = FNYVector2f(-ConditionOverlayWidget->GetDesiredSize().X / 1.5f, OriginLeftSide.Y);
+		Overlay.OverlayOffset = FVector2D(-ConditionOverlayWidget->GetDesiredSize().X / 1.5f, OriginLeftSide.Y);
 		Widgets.Add(Overlay);
 		OriginLeftSide.Y += ConditionOverlayWidget->GetDesiredSize().Y + DistanceBetweenWidgetsY;
 	}
@@ -171,12 +171,17 @@ TArray<FOverlayWidgetInfo> SDlgGraphNode::GetOverlayWidgets(bool bSelected, cons
 	//-----------------------------------------------------------------------------
 		// Position on the left of the node
 		FOverlayWidgetInfo Overlay(EventOverlayWidget);
-		Overlay.OverlayOffset = FNYVector2f(-EventOverlayWidget->GetDesiredSize().X / 1.5f, OriginLeftSide.Y);
+		Overlay.OverlayOffset = FVector2D(-EventOverlayWidget->GetDesiredSize().X / 1.5f, OriginLeftSide.Y);
 		Widgets.Add(Overlay);
 		OriginLeftSide.Y += EventOverlayWidget->GetDesiredSize().Y + DistanceBetweenWidgetsY;
 	}
 
 	return Widgets;
+}
+
+void SDlgGraphNode::GetOverlayBrushes(bool bSelected, const FVector2D WidgetSize, TArray<FOverlayBrushInfo>& Brushes) const
+{
+	Super::GetOverlayBrushes(bSelected, WidgetSize, Brushes);
 }
 
 // End SNodePanel::SNode Interface
@@ -333,13 +338,8 @@ void SDlgGraphNode::UpdateGraphNode()
 
 		// Add it at the top, right above
 		GetOrAddSlot(ENodeZone::TopCenter)
-#if NY_ENGINE_VERSION >= 506
-			.SlotOffset2f(TAttribute<FVector2f>(CommentBubble.Get(), &SCommentBubble::GetOffset2f))
-			.SlotSize2f(TAttribute<FVector2f>(CommentBubble.Get(), &SCommentBubble::GetSize2f))
-#else
 			.SlotOffset(TAttribute<FVector2D>(CommentBubble.Get(), &SCommentBubble::GetOffset))
 			.SlotSize(TAttribute<FVector2D>(CommentBubble.Get(), &SCommentBubble::GetSize))
-#endif
 			.AllowScaling(TAttribute<bool>(CommentBubble.Get(), &SCommentBubble::IsScalingAllowed))
 			.VAlign(VAlign_Top)
 			[
@@ -352,7 +352,7 @@ void SDlgGraphNode::UpdateGraphNode()
 
 const TArray<FDlgCondition>* SDlgGraphNode::GetEnterConditions() const
 {
-	return &DialogueGraphNode->GetDialogueNode().GetNodeEnterConditions();
+	return &DialogueGraphNode->GetDialogueNode().GetNodeEnterConditions(); 
 }
 
 const TArray<FDlgEvent>* SDlgGraphNode::GetEnterEvents() const
@@ -388,7 +388,7 @@ TSharedRef<SWidget> SDlgGraphNode::GetNodeBodyWidget()
 //	PopulateMetaTag(&TagMeta);
 
 	TSharedPtr<SVerticalBox> NodeVerticalBox;
-
+	
 	NodeBodyWidget =
 		SNew(SBorder)
 		.BorderImage(FNYAppStyle::GetBrush("BTEditor.Graph.BTNode.Body"))
