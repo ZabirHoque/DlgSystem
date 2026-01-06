@@ -130,6 +130,18 @@ TArray<FOverlayWidgetInfo> SDlgGraphNode_Edge::GetOverlayWidgets(bool bSelected,
 			OriginOverlay.X += NewDesiredSize.X + DistanceBetweenWidgetsX;
 		}
 	}
+
+    if (SelectionWeightOverlayWidget.IsValid())
+    {
+        FOverlayWidgetInfo Overlay(SelectionWeightOverlayWidget);
+
+        // Position on the bottom/right of the node
+        const FVector2D& NewDesiredSize = SelectionWeightOverlayWidget->GetDesiredSize();
+        Overlay.OverlayOffset = FVector2D((WidgetSize.X - NewDesiredSize.X / 2.0f) + OriginOverlay.X, -NewDesiredSize.Y / 2.0f);
+        Widgets.Add(Overlay);
+
+        OriginOverlay.X += NewDesiredSize.X + DistanceBetweenWidgetsX;
+    }
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 
@@ -175,6 +187,17 @@ void SDlgGraphNode_Edge::UpdateGraphNode()
 		.ToolTipText(this, &Self::GetTextOverlayTooltipText)
 		.Visibility(this, &Self::GetOverlayWidgetVisibility)
 		.OnGetBackgroundColor(this, &Self::GetOverlayWidgetBackgroundColor);
+
+    SelectionWeightOverlayWidget = SNew(SDlgNodeOverlayWidget)
+        .OverlayBody(
+            SNew(STextBlock)
+            .Text(this, &Self::GetSelectionWeightOverlayText)
+            .ColorAndOpacity(FLinearColor::Black)
+            .Font(FNYAppStyle::GetFontStyle("BTEditor.Graph.BTNode.IndexText"))
+        )
+        .ToolTipText(this, &Self::GetSelectionWeightOverlayTooltipText)
+        .Visibility(this, &Self::GetSelectionWeightOverlayWidgetVisibility)
+        .OnGetBackgroundColor(this, &Self::GetOverlayWidgetBackgroundColor);
 	// Torbie End Change
 	//-----------------------------------------------------------------------------
 
@@ -339,6 +362,29 @@ FText SDlgGraphNode_Edge::GetConditionOverlayTooltipText() const
 FText SDlgGraphNode_Edge::GetTextOverlayTooltipText() const
 {
 	return LOCTEXT("NodeTextTooltip", "Edge contains text that can be presented.");
+}
+
+FText SDlgGraphNode_Edge::GetSelectionWeightOverlayText() const
+{
+    return FText::Format(LOCTEXT("SelectionWeight", "{0}"), DialogueGraphNode_Edge->GetDialogueEdge().SelectionWeight);
+}
+
+FText SDlgGraphNode_Edge::GetSelectionWeightOverlayTooltipText() const
+{
+    return LOCTEXT("NodeSelectionWeightTooltip", "Edge weight for random selector.");
+}
+
+EVisibility SDlgGraphNode_Edge::GetSelectionWeightOverlayWidgetVisibility() const
+{
+    if (UDialogueGraphNode* ParentNode = DialogueGraphNode_Edge->GetParentNode())
+    {
+        if (auto* SelectorNode = Cast<UDlgNode_Selector>(ParentNode->GetMutableDialogueNode()))
+        {
+            return SelectorNode->GetSelectorType() == EDlgNodeSelectorType::Random ? GetOverlayWidgetVisibility() : EVisibility::Collapsed;
+        }
+    }
+
+    return EVisibility::Collapsed;
 }
 // Torbie End Change
 //-----------------------------------------------------------------------------
