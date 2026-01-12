@@ -1205,7 +1205,7 @@ bool UDlgContext::ValidateParticipantsMapForDialogue(
 		if (bLog)
 		{
 			TArray<FString> ParticipantsMissing;
-			for (const FName& Name : ParticipantsRequiredSet)
+			for (const auto Name : ParticipantsRequiredSet)
 			{
 				ParticipantsMissing.Add(Name.ToString());
 			}

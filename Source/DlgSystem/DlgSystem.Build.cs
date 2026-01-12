@@ -24,7 +24,7 @@ public class DlgSystem : ModuleRules
 		bEnforceIWYU = true;
 #endif
 
-		bUseUnity = true;
+		// bUseUnity = false;
 
 		PublicDependencyModuleNames.AddRange(
 			new string[] {
